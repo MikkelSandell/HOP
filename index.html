@@ -1,1 +1,42 @@
-asd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body style="background-color: #444059;">
+    <div class="container d-flex align-items-center vh-100">
+        <div class="mx-auto text-center login p-2" style="background-color: white;">
+          <h1>Log ind </h1>
+          <p>Skriv venligst dine oplysninger her nedenunder</p>
+          <form id="loginForm">
+            <div class="mb-3">
+              <label for="email_input" class="form-label">Email adresse</label>
+              <input type="email" class="form-control" id="email_input">
+                        </div>
+            <div class="mb-3">
+              <label for="password_input" class="form-label">Kodeord</label>
+              <input type="password" class="form-control" id="password_input">
+            </div>
+            <button type="submit" class="btn btn-primary" onclick="login()">Log ind</button>
+          </form>
+        </div>
+      </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script>
+ var form = document.getElementById("loginForm");
+
+form.addEventListener("submit", function(event) {
+  // Prevent the default form submission
+  event.preventDefault();
+  
+  // Redirect to "hej.html"
+  window.location.href = "mainPage.html";
+  // You can also perform other actions or call other functions here
+});
+
+</script>
+</body>
+</html>

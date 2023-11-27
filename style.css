@@ -1,0 +1,20 @@
+.container {
+    background-color: white;
+}
+.navbar{
+    background-color: #444059;
+}
+.navbar-nav .nav-link {
+    color: white; /* Change this to your desired text color */
+  }
+
+  /* Change the text color of active navbar link */
+  .navbar-nav .nav-link.active {
+    color: white; /* Change this to your desired text color */
+  }
+  .form-control{
+    width: 125px;
+  }
+  .dropdown-menu{
+    margin-top: 20% !important;
+  }
