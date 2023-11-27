@@ -18,3 +18,7 @@
   .dropdown-menu{
     margin-top: 20% !important;
   }
+  #roomTable tbody tr:hover{
+    background-color: grey !important;
+    cursor: pointer;
+  }

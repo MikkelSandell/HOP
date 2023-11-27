@@ -6,6 +6,7 @@
     <title>Alle rum</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
+    <script src="allRooms.js"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg">
@@ -54,12 +55,42 @@
             </div>
             </div>
             </nav>
-    <div class="container">
-       
+    <div class="container-fluid">
+      <table class="table" id="roomTable">
+        <thead>
+          <tr>
+            <th scope="col">Navn på rum</th>
+            <th scope="col">Medlem siden</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr>
+              <td>DAT123A</td>
+              <td>27/11-2023</td>
+            </tr>
+          <!-- Add more rows as needed -->
+        </tbody>
+      </table>
       </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 <script>
+var tableRow = document.querySelector("#roomTable tbody tr");
 
+tableRow.addEventListener("mouseover", function() {
+    // Add your hover event logic here
+    this.style.backgroundColor = "#e0e0e0";
+  });
+
+  tableRow.addEventListener("mouseout", function() {
+    // Add your hover event logic here
+    this.style.backgroundColor = "";
+  });
+
+  // Click event
+  tableRow.addEventListener("click", function() {
+    // Add your click event logic here
+    window.location.href = "selectedRoom.html";
+  });
 </script>
 </body>
 </html>
