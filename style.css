@@ -22,3 +22,6 @@
     background-color: grey !important;
     cursor: pointer;
   }
+  .calendar_default_corner{
+    background: rgb(243, 243, 243) !important;
+  }
