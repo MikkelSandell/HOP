@@ -31,7 +31,7 @@
                             </div>
                             <div class="row rooms">
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a href="selectedRoom.html?room=1" class="room_link">Rum 1</a></li>
+                                <li><a href="selectedRoom.html?room=" class="room_link">Rum 1</a></li>
                                 </div>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="allRooms.html">Vis alle rum</a></li>
@@ -55,6 +55,31 @@
             </div>
             </div>
             </nav>
+            <nav class="navbar navbar-expand-lg room_menu">
+                <div class="container-fluid">
+                  <a class="navbar-brand room_name" href="mainPage.html"></a>
+                  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+                  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                      <li class="nav-item">
+                        <a class="nav-link room_link" href="selectedRoom.html?room=">Oversigt</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link room_link" href="Calendar_room.html?room=">Kalender</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link room_link" href="room_resources.html?room=">Resourcer</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link room_link" href="room_users.html?room=">Deltagere</a>
+                    </li>
+                      
+                    </ul>
+                    </div>
+                    </div>
+                    </nav>
     <div class="container">
         <div class="space">
             Uge:
@@ -176,6 +201,25 @@ var formattedDateEnd = end.toLocaleString();
 var corner = document.querySelector(".calendar_default_corner");
         corner.innerHTML ='<div class="calendar_default_corner_inner" unselectable="on"></div>';
 app.init();
+
+var urlParams = new URLSearchParams(window.location.search);
+var variable1Value = urlParams.get('room');
+document.querySelector(".room_name").href = "javascript:void(0)";
+document.querySelector(".room_name").style.color = "white";
+document.querySelector(".room_name").onclick = function() {
+    return false;
+  };
+  document.querySelector(".room_name").addEventListener("mouseover", function() {
+    // Change the cursor style to text
+    this.style.cursor = "text";
+  });
+document.querySelector(".room_name").innerHTML = variable1Value;
+var roomLinks = document.querySelectorAll(".room_link");
+
+// Iterate through each element and modify the href attribute
+roomLinks.forEach(function(link) {
+  link.href += variable1Value;
+});
       </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 "use strict";
-async function callPostgRESTFunction() {
+async function callPostgRESTFunction(room) {
     try {
-      const response = await fetch(`49.13.148.231:3000/rpc/hello_world`, {
+      const response = await fetch(`http://49.13.148.231:3000/rpc/testing?room=`+room, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -21,5 +21,3 @@ async function callPostgRESTFunction() {
     }
   }
   
-  // Call the function
-  callPostgRESTFunction();

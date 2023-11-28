@@ -12,15 +12,23 @@
           <h1>Log ind </h1>
           <p>Skriv venligst dine oplysninger her nedenunder</p>
           <form id="loginForm">
-            <div class="mb-3">
-              <label for="email_input" class="form-label">Email adresse</label>
-              <input type="email" class="form-control" id="email_input">
-                        </div>
-            <div class="mb-3">
-              <label for="password_input" class="form-label">Kodeord</label>
-              <input type="password" class="form-control" id="password_input">
+        
+            <div class="form-floating">
+              <input type="email" class="form-control" id="floatingInput" placeholder="email@eksempel.dk">
+              <label for="floatingInput">Email Adresse</label>
             </div>
-            <button type="submit" class="btn btn-primary" onclick="login()">Log ind</button>
+            <div class="form-floating">
+              <input type="password" class="form-control" id="floatingPassword" placeholder="Kodeord">
+              <label for="floatingPassword">Kodeord</label>
+            </div>
+        
+            <div class="checkbox mb-3">
+              <label>
+                <input type="checkbox" value="remember-me"> Husk mig
+              </label>
+            </div>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Log ind</button>
+            <p class="mt-5 mb-3 text-muted">© 2023</p>
           </form>
         </div>
       </div>
