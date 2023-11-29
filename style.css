@@ -91,3 +91,14 @@ body {
 .btn-toggle-nav a:focus {
   background-color: var(--bs-tertiary-bg);
 }
+.nested-dropdown{
+  top: 0% !important;
+  left: auto !important;
+  margin-top: 23% !important;
+}
+.hidden {
+  display: none;
+}
+.settings:hover{
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='white' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}

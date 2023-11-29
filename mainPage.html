@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forside</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-          <a class="navbar-brand" href="mainPage.html">Navbar</a>
+          <a class="navbar-brand" href="mainPage.html"><i class="bi bi-code-square"></i></a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -20,17 +22,29 @@
                     <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       Rum
                     </a>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu" id="sortingDropdown">
                         <div class="container">
                             <div class="row">
                                 <form class="d-flex">
-                                    <input class="form-control me-2" type="search" placeholder="Find Rum" aria-label="Search" width="550px">
-                                    <button class="btn btn-primary" type="button">Sortér</button>
+                                  <div class="border p-2">
+                                    <input class="form-control me-2 border-0 sorting" type="search" placeholder="Find Rum" aria-label="Search" oninput="search(this.value)">
+                                  </div>
+                                  <div class="border p-2">
+                                    <button class="btn btn-primary" id="sortingButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Sortér
+                                    </button>
+                                    <ul class="nested-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                      <li><a class="dropdown-item" href="#" onclick="updateSortOrder('asc', event)">Alfabetisk</a></li>
+                                      <li><a class="dropdown-item" href="#" onclick="updateSortOrder('desc', event)">Omvendt Alfabetisk</a></li>
+                                    </ul>
+                                  </div>
                                 </form>
-                            </div>
-                            <div class="row rooms">
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a href="selectedRoom.html?room=1">Rum 1</a></li>
+                            </div>
+                            <div class="row rooms" id="roomList">
+                              <li><a href="selectedRoom.html?room=1">Rum 1</a></li>
+                              <li><a href="selectedRoom.html?room=2">Rum 2</a></li>
+                              <li><a href="selectedRoom.html?room=3">Rum 3</a></li>
                                 </div>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="allRooms.html">Vis alle rum</a></li>
@@ -52,6 +66,17 @@
               
             </ul>
             </div>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item dropdown">
+                <a class="nav-link navbar-toggler-icon settings" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                </a>                  <div class="dropdown-menu dropdown-menu-end">
+                      <a href="#" class="dropdown-item">Find på noget her</a>
+                      <a href="#" class="dropdown-item">Skal der være noget her??</a>
+                      <div class="dropdown-divider"></div>
+                      <a href="index.html" class="dropdown-item">Logout</a>
+                  </div>
+              </li>
+          </ul>
             </div>
             </nav>
             <div class="container-fluid">
@@ -85,7 +110,103 @@
                 </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 <script>
-
+  document.getElementById("sortingButton").addEventListener("click", function(event){
+    event.stopPropagation();
+  });
+  document.getElementById('sortingDropdown').addEventListener('click', function (event) {
+        event.stopPropagation();
+      });
+  
+  
+      function search(val) {
+        // Convert the search value to lowercase for case-insensitive matching
+        var searchValue = val.toLowerCase();
+  
+        // Get all list items
+        var listItems = document.querySelectorAll('.rooms li');
+  
+        // Loop through each list item
+        listItems.forEach(function (item) {
+          // Get the text content of the anchor tag within the list item
+          var textContent = item.querySelector('a').textContent.toLowerCase();
+  
+          // Check if the search value is found in the text content
+          if (textContent.includes(searchValue)) {
+            // Show the list item
+            item.classList.remove('hidden');
+          } else {
+            // Hide the list item
+            item.classList.add('hidden');
+          }
+        });
+      }
+      
+  var asc = true;
+  function updateSortOrder(selectedValue, event) {
+    event.stopPropagation();
+  
+        // Handle the selected value from the dropdown
+        console.log("Selected sorting option: " + selectedValue);
+        asc = (selectedValue === "asc");
+        var ul = document.getElementById("roomList");
+  
+        // Get all li elements within the ul
+        var liArray = Array.from(ul.getElementsByTagName("li"));
+  
+        // Sort li elements based on their text content (room names)
+        liArray.sort(function(a, b) {
+          var nameA = a.textContent.trim();
+          var nameB = b.textContent.trim();
+  
+          if (asc) {
+            return nameA.localeCompare(nameB);
+          } else {
+            return nameB.localeCompare(nameA);
+          }
+        });
+  
+        // Remove existing li elements from the ul
+        ul.innerHTML = "";
+  
+        // Append the sorted li elements back to the ul
+        liArray.forEach(function(li) {
+          ul.appendChild(li);
+        });
+  
+        // Toggle the sorting order for the next click
+        asc = !asc;
+      }
+  
+  function sorting() {
+        // Get the ul element containing the li items
+        var ul = document.getElementById("roomList");
+  
+        // Get all li elements within the ul
+        var liArray = Array.from(ul.getElementsByTagName("li"));
+  
+        // Sort li elements based on their text content (room names)
+        liArray.sort(function(a, b) {
+          var nameA = a.textContent.trim();
+          var nameB = b.textContent.trim();
+  
+          if (asc) {
+            return nameA.localeCompare(nameB);
+          } else {
+            return nameB.localeCompare(nameA);
+          }
+        });
+  
+        // Remove existing li elements from the ul
+        ul.innerHTML = "";
+  
+        // Append the sorted li elements back to the ul
+        liArray.forEach(function(li) {
+          ul.appendChild(li);
+        });
+  
+        // Toggle the sorting order for the next click
+        asc = !asc;
+      }
 </script>
 </body>
 </html>
