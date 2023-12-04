@@ -14,36 +14,136 @@
           <form id="loginForm">
         
             <div class="form-floating">
-              <input type="email" class="form-control" id="floatingInput" placeholder="email@eksempel.dk">
-              <label for="floatingInput">Email Adresse</label>
+              <input type="email" class="form-control" id="email" placeholder="email@eksempel.dk">
+              <label for="email">Email Adresse</label>
             </div>
             <div class="form-floating">
-              <input type="password" class="form-control" id="floatingPassword" placeholder="Kodeord">
-              <label for="floatingPassword">Kodeord</label>
+              <input type="password" class="form-control" id="pass" placeholder="Kodeord">
+              <label for="pass">Kodeord</label>
             </div>
         
-            <div class="checkbox mb-3">
-              <label>
-                <input type="checkbox" value="remember-me"> Husk mig
-              </label>
-            </div>
             <button class="w-100 btn btn-lg btn-primary" type="submit">Log ind</button>
             <p class="mt-5 mb-3 text-muted">© 2023</p>
           </form>
         </div>
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="ErrorModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="errorModalLabel">Email eller kodeord er forkert</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Tjek venligst om du har skrevet de rigtige oplysninger og prøv igen!
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
 <script>
  var form = document.getElementById("loginForm");
-
 form.addEventListener("submit", function(event) {
   // Prevent the default form submission
   event.preventDefault();
   
+var email = document.getElementById("email").value;
+var pass = document.getElementById("pass").value;
+authenticate(email,pass);
+
   // Redirect to "hej.html"
-  window.location.href = "mainPage.html";
+  //window.location.href = "html/mainPage.html";
   // You can also perform other actions or call other functions here
 });
+async function authenticate(email, pass) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/authenticate_user?email="+ email + "&pass=" + pass, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      if(result == true){
+       await encode(email,pass);
+      var logged_in_user = await find_user(email);
+      localStorage.setItem("logged_in_user", JSON.stringify(logged_in_user));
+      console.log(localStorage.getItem("logged_in_user"));
+      if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Underviser"){
+        window.location.href = "html/teacher/mainPage.html";
+      }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
+        window.location.href = "html/student/mainPage.html";
+      }
+
+      }else if (result == false){
+        $('#errorModal').modal('show');
+
+      }
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+  }
+
+  async function encode(email, pass) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/jwt_encoder?user_email="+ email + "&user_password=" + pass, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+// Calculate the expiration time (30 minutes from now)
+var expirationDate = new Date();
+expirationDate.setTime(expirationDate.getTime() + 30 * 60 * 1000); // 30 minutes in milliseconds
+
+// Set the cookie with the calculated expiration time
+document.cookie = "JWT=" + result + "; expires=" + expirationDate.toUTCString() + "; path=/";
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+  }
+
+  async function find_user(user_email) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_user_by_user_email?user_email=" + user_email, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      return result[0];
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
 
 </script>
 </body>

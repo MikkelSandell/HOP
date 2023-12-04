@@ -99,6 +99,23 @@ body {
 .hidden {
   display: none;
 }
-.settings:hover{
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='white' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+
+.settings_content{
+  width: 20rem !important;
+}
+
+.profile_image{
+  border-radius: 50% !important;
+  background-image: none;
+    background-size: 40px;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #a393a1;
+}
+.settings .user_name{
+  font-weight: 600;
+
+}
+.user_info{
+  padding-right: 2rem;
 }
