@@ -7,16 +7,16 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link room_link" href="selectedRoom.html?room=">Oversigt</a>
+            <a class="nav-link room_link" href="selectedRoom.html?">Oversigt</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link room_link" href="Calendar_room.html?room=">Kalender</a>
+            <a class="nav-link room_link" href="Calendar_room.html?">Kalender</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link room_link" href="room_resources.html?room=">Resourcer</a>
+            <a class="nav-link room_link" href="room_resources.html?">Resourcer</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link room_link" href="room_users.html?room=">Deltagere</a>
+            <a class="nav-link room_link" href="room_users.html?">Deltagere</a>
         </li>
           
         </ul>
@@ -25,8 +25,7 @@
         </div>
         </nav>
         <script>
-            var urlParams = new URLSearchParams(window.location.search);
-var variable1Value = urlParams.get('room');
+          var room = JSON.parse(localStorage.getItem("selected_room"));
 
 document.querySelector(".room_name").href = "javascript:void(0)";
 document.querySelector(".room_name").style.color = "white";
@@ -37,11 +36,6 @@ document.querySelector(".room_name").onclick = function() {
     // Change the cursor style to text
     this.style.cursor = "text";
   });
-document.querySelector(".room_name").innerHTML = variable1Value;
-var roomLinks = document.querySelectorAll(".room_link");
+document.querySelector(".room_name").innerHTML = room.room_name;
 
-// Iterate through each element and modify the href attribute
-roomLinks.forEach(function(link) {
-  link.href += variable1Value;
-});
         </script>

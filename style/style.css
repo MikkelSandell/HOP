@@ -104,7 +104,7 @@ body {
   width: 20rem !important;
 }
 
-.profile_image{
+#profile_image{
   border-radius: 50% !important;
   background-image: none;
     background-size: 40px;
@@ -118,4 +118,8 @@ body {
 }
 .user_info{
   padding-right: 2rem;
+}
+#imagePreview{
+  width: 150px;
+  height: 150px;
 }

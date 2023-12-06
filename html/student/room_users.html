@@ -43,14 +43,13 @@
               $("#roomMenu").load("http://localhost:5500/html/includes/RoomMenu.html");
            });
       });
-      document.addEventListener("DOMContentLoaded", function() {
+      document.addEventListener("DOMContentLoaded", async function() {
+
     // Sample data for the table
-    var data = [
-      { navn: "John Doe", rolle: "Studerende" },
-      { navn: "Jane Smith", rolle: "Underviser" },
-      { navn: "Bob Johnson", rolle: "Administrator" },
-      // Add more data as needed
-    ];
+    var roomUsers = await getRoomUsers(JSON.parse(localStorage.getItem("selected_room")).room_id);
+    var data = roomUsers.map(user => {
+  return { navn: user.users_name, rolle: user.roles_name }; // Adjust property names as needed
+});
 
     // Get the table body, the sort dropdown, and the unique roles
     var tbody = document.getElementById("myTableBody");
@@ -100,6 +99,28 @@
       populateTable(selectedRole);
     });
   });
+  async function getRoomUsers(room_oid) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_users_by_room_oid?room_oid=" + room_oid, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+return result;
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
 </script>
 </body>
 </html>

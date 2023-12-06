@@ -13,10 +13,6 @@
           </tr>
         </thead>
         <tbody>
-            <tr>
-              <td>DAT123A</td>
-              <td>27/11-2023</td>
-            </tr>
           <!-- Add more rows as needed -->
         </tbody>
       </table>
@@ -26,17 +22,65 @@
 
     <script>
     
-      document.addEventListener("DOMContentLoaded", function()  {
+      document.addEventListener("DOMContentLoaded", async function()  {
         $(function() {
               $("#menu").load("http://localhost:5500/html/includes/menu.html");
            });
            $(function() {
               $("#head").load("http://localhost:5500/html/includes/head.html");
            });
+           await create_rooms_list();
       });
-var tableRow = document.querySelector("#roomTable tbody tr");
 
-tableRow.addEventListener("mouseover", function() {
+
+  // Click event
+
+  async function create_rooms_list() {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_users_rooms_by_email?user_email=" + JSON.parse(localStorage.getItem("logged_in_user")).email, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log(result);
+      if (result.length == 0){
+        //tableRow.innerHTML = "Ingen rum";
+      }else{
+      result.forEach(element => {
+        var tableRow = document.createElement("tr");
+        var tableDataName = document.createElement("td");
+        var tableDataJoined = document.createElement("td");
+        tableDataName.innerHTML = element.room_name;
+        const date = new Date(element.add_date_and_year);
+        const day = date.getDate().toString().padStart(2, '0');
+const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
+const year = date.getFullYear();
+
+const formattedDate = `${day}/${month}-${year}`;
+        tableDataJoined.innerHTML = formattedDate;
+        tableRow.appendChild(tableDataName);
+        tableRow.addEventListener("click", async function(e) {
+          e.preventDefault();
+          var roomInfo = await saveRoomInfo(element.room_id);
+          localStorage.setItem("selected_room", JSON.stringify(roomInfo));
+          if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Underviser"){
+        window.location.href = "http://localhost:5500/html/teacher/selectedRoom.html";
+      }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
+        window.location.href = "http://localhost:5500/html/student/selectedRoom.html";
+      }
+      
+        });
+        tableRow.addEventListener("mouseover", function() {
     // Add your hover event logic here
     this.style.backgroundColor = "#e0e0e0";
   });
@@ -45,12 +89,37 @@ tableRow.addEventListener("mouseover", function() {
     // Add your hover event logic here
     this.style.backgroundColor = "";
   });
+  tableRow.appendChild(tableDataJoined);
+      document.querySelector("#roomTable tbody").appendChild(tableRow);
+      });
+    }
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
+async function saveRoomInfo(oid) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_room_by_oid?room_oid=" + oid, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      return result[0];
 
-  // Click event
-  tableRow.addEventListener("click", function() {
-    // Add your click event logic here
-    window.location.href = "selectedRoom.html?room=1";
-  });
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
 </script>
 </body>
 </html>

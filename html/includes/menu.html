@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-      <a class="navbar-brand" href="mainPage.html"><i class="bi bi-code-square"></i></a>
+      <a class="navbar-brand" id="mainPageLink" href="../mainPage.html"><i class="bi bi-code-square"></i></a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -30,9 +30,7 @@
                             <li><hr class="dropdown-divider"></li>
                         </div>
                         <div class="row rooms" id="roomList">
-                          <li><a href="selectedRoom.html?room=1">Rum 1</a></li>
-                          <li><a href="selectedRoom.html?room=2">Rum 2</a></li>
-                          <li><a href="selectedRoom.html?room=3">Rum 3</a></li>
+
                             </div>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="allRooms.html">Vis alle rum</a></li>
@@ -49,7 +47,8 @@
             <a class="nav-link" href="https://office.com" target="_blank">Office 365</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" target="_blank">Book grupperum</a>
+            <a class="nav-link" href="#">Book grupperum</a>
+            <!-- target="_blank" -->
           </li>
           
         </ul>
@@ -57,12 +56,12 @@
         <ul class="navbar-nav me-auto">
           <li class="nav-item dropdown">
             <a class="nav-link settings" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="../../images/blank-profile-picture-973460_640.png" class="profile_image"><span  class="p-2 user_name"></span>
+              <img src="../../images/blank-profile-picture-973460_640.png" id="profile_image"><span  class="p-2 user_name"></span>
             </a>                  <div class="dropdown-menu dropdown-menu-end settings_content">
               <p class="user_info"><span class="user_name"></span>, <span id="user_role"></span></p>
               <div class="dropdown-divider"></div>
 
-                  <a href="#" class="dropdown-item">Dine Indstillinger</a>
+                  <a href="http://localhost:5500/html/settings.html" class="dropdown-item">Dine Indstillinger</a>
                   <div class="dropdown-divider"></div>
                   <a href="http://localhost:5500/index.html" class="dropdown-item">Log ud</a>
               </div>
@@ -78,15 +77,23 @@ elements.forEach(element => {
   element.innerHTML = JSON.parse(localStorage.getItem("logged_in_user")).users_name;
 });
           document.getElementById("user_role").innerHTML = JSON.parse(localStorage.getItem("logged_in_user")).roles_name;
+          if (JSON.parse(localStorage.getItem("logged_in_user")).users_image == null){
+            document.getElementById("profile_image").setAttribute("src", "http://localhost:5500/images/blank-profile-picture-973460_640.png");
+              }else {
+                document.getElementById("profile_image").setAttribute("src", "data:image/png;base64,"+JSON.parse(localStorage.getItem("logged_in_user")).users_image);
 
+              }
           document.getElementById("sortingButton").addEventListener("click", function(event){
     event.stopPropagation();
   });
   document.getElementById('sortingDropdown').addEventListener('click', function (event) {
         event.stopPropagation();
       });
-  
-  
+      if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Underviser"){
+        document.getElementById("mainPageLink").href = "http://localhost:5500/html/teacher/mainPage.html";
+      }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
+        document.getElementById("mainPageLink").href = "http://localhost:5500/html/student/mainPage.html";
+      }  
       function search(val) {
         // Convert the search value to lowercase for case-insensitive matching
         var searchValue = val.toLowerCase();
@@ -146,6 +153,7 @@ elements.forEach(element => {
         asc = !asc;
       }
   
+
   function sorting() {
         // Get the ul element containing the li items
         var ul = document.getElementById("roomList");
@@ -176,4 +184,74 @@ elements.forEach(element => {
         // Toggle the sorting order for the next click
         asc = !asc;
       }
+
+      async function create_rooms_list() {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_users_rooms_by_email?user_email=" + JSON.parse(localStorage.getItem("logged_in_user")).email, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      if (result.length == 0){
+        document.getElementById("roomList").innerHTML = "Ingen rum";
+      }else{
+      result.forEach(element => {
+        var li = document.createElement("li");
+        var link = document.createElement("a");
+        link.href = "javascript:void(0);";
+        link.classList.add("room");
+        link.innerHTML = element.room_name;
+        link.addEventListener("click", async function(e) {
+          e.preventDefault();
+          var roomInfo = await saveRoomInfo(element.room_id);
+          localStorage.setItem("selected_room", JSON.stringify(roomInfo));
+          if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Underviser"){
+        window.location.href = "http://localhost:5500/html/teacher/selectedRoom.html";
+      }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
+        window.location.href = "http://localhost:5500/html/student/selectedRoom.html";
+      }
+        });
+        li.appendChild(link);
+        document.getElementById("roomList").appendChild(li);
+      });
+    }
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
+
+async function saveRoomInfo(oid) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_room_by_oid?room_oid=" + oid, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      return result[0];
+
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
+create_rooms_list();
         </script>

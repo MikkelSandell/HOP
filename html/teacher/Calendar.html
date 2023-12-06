@@ -5,35 +5,39 @@
 <body>
 <div id="menu"></div>
     <div class="container">
-        <div class="space">
-            Uge:
-            <a href="javascript:dp.startDate = dp.startDate.addDays(-7); dp.update();" id="previous">Tidligere</a>
-            |
-            <a href="javascript:dp.startDate = dp.startDate.addDays(7); dp.update();" id="next">Næste</a>
-        </div>
-        <div id="dp"></div>
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  ...
-                </div>
-                <div class="modal-footer">
-                 
-                </div>
-              </div>
+      <div id="ec"></div>
+      <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="myModalLabel">Modal title</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <label for="start">Starttidspunkt:</label>
+              <input type="datetime-local" id="start" name="start" ><br>
+              <label for="end">Sluttidspunkt:</label>
+              <input type="datetime-local" id="end" name="end"><br>
+              <label for="type">Vælg type:</label>
+              <select id="type">
+                <option value="1">Plan</option>
+                <option value="2">Opgave</option>
+              </select><br>
+              <label for="content">Inhold:</label>
+              <input type="text" name="content" id="Content">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
+              <button type="button" class="btn btn-primary" id="create">Opret</button>
             </div>
           </div>
-
+        </div>
       </div>
+      </div>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@2.4.1/event-calendar.min.css">
+      <script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@2.4.1/event-calendar.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-    <script src="http://localhost:5500/scripts/daypilot-all.min.js"></script>
-
     <script>
     
       document.addEventListener("DOMContentLoaded", function()  {
@@ -43,127 +47,100 @@
            $(function() {
               $("#head").load("http://localhost:5500/html/includes/head.html");
            });
+
+
+
       })
-        const dp = new DayPilot.Calendar("dp", {
-  locale: "da-dk",
-  viewType: "Week",
-  headerDateFormat: "d MMMM yyyy",
-  cellHeight: 40,
-  crosshairType: "Disabled",
-  dayBeginsHour: 7,
-  dayEndsHour: 2,
-  businessBeginsHour: 7,
-  businessEndsHour: 2,
-  timeRangeSelectedHandling: "Disabled",
-  eventMoveHandling: "Disabled",
-  eventResizeHandling: "Disabled",
-  eventClickHandling: "Enabled",
-  durationBarVisible: "true",
-  eventArrangement: "SideBySide",
+      function createCalendarEvent() {
+    const startInput = document.getElementById('start');
+    const endInput = document.getElementById('end');
+    const typeSelect = document.getElementById('type');
+    const contentInput = document.getElementById('Content');
 
-  onEventClicked: (args) => {
-    var modal = new bootstrap.Modal(document.getElementById("exampleModal"));
+    // Get the selected type value
+    const selectedType = typeSelect.options[typeSelect.selectedIndex].value;
 
-  // Set the modal title
-  var modalTitle = document.querySelector("#exampleModalLabel");
-  modalTitle.textContent = "Detaljer";
+    // Convert date inputs to the desired format
+    const startDateTime = new Date(startInput.value).toISOString();
+    const endDateTime = new Date(endInput.value).toISOString();
 
-  // Set the modal body content (customize this based on your event data)
-  var modalBody = document.querySelector(".modal-body");
-  modalBody.textContent = args.e.text();
+    // Create the calendar event object
+    const calendarEvent = {
+      id: 1, // You can generate a unique ID based on your requirements
+      start: startDateTime,
+      end: endDateTime,
+      resourceID: parseInt(selectedType),
+      editable: false,
+      title: { html: `<p>${contentInput.value}</p>` },
+      color: "#FE6B64"
+    };
 
+    // Log the created calendar event object (you can send it to your calendar library)
+    ec.addEvent(calendarEvent);
+  }
+  document.getElementById('create').addEventListener('click', createCalendarEvent);
 
-  /* 
-  TODO: Skal laves på admin og underviser
-  eventDeleteHandling: "Update",
-  onEventDeleted: (args) => {
-    console.log("Event deleted: " + args.e.text());
-  },
-  eventMoveHandling: "Update",
-  onEventMoved: (args) => {
-    console.log("Event moved: " + args.e.text());
-  },
-  eventResizeHandling: "Disabled",
-  eventClickHandling: "Edit",
-  eventEditHandling: "Update",
-  onEventEdited: (args) => {
-    args.control.message("Event edited: " + args.e.text());
-  },
+    
+      const ec = new EventCalendar(document.getElementById('ec'), {
+        
+        view: 'timeGridWeek',
+        headerToolbar: {
+            start: 'prev,next today',
+            center: 'title',
+            end: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        buttonText: function (texts) {
+            texts.today = 'I dag';
+            texts.dayGridMonth = 'Måned';
+
+            texts.timeGridWeek = 'Uge';
+            texts.timeGridDay = 'Dag';
+            texts.listWeek = 'Liste';
+
+            return texts;
+        },
+        resources: [
+            {id: 1, title: 'Planer'},
+            {id: 2, title: 'Opgaver'}
+        ],
+        eventClick: function (info) {console.log(info);},
+        dateClick: function (info) {console.log(info); const myModal = new bootstrap.Modal(document.getElementById('myModal')); myModal.show(); document.getElementById("start").value = info.dateStr;  },
+        addEvent: function (event){console.log(event); },
+        firstDay: 1,
+        scrollTime: '09:00:00',
+        events: createEvents(),
+        views: {
+            timeGridWeek: {pointer: true},
+        },
+        dayMaxEvents: false,
+        nowIndicator: true,
+        selectable: true,
+        allDaySlot: false,
+        locale: "da-dk",
   
-  
-  */
-  // Show the modal
-  modal.show();
-    console.log("Event clicked: " + args.e.text());
-  },
-  eventHoverHandling: "Bubble",
-  bubble: new DayPilot.Bubble({
-    onLoad: (args) => {
-      // if event object doesn't specify "bubbleHtml" property 
-      // this onLoad handler will be called to provide the bubble HTML
-      args.html = "Event details";
-    }
-  }),
-});
-        dp.events.list = [
-          {
-            id: "1",
-            start: new DayPilot.Date("2023-12-04T13:20:00"),
-            end: new DayPilot.Date("2023-12-04T13:20:00"),
-            text: "Opgave 1",
-          },
-          {
-            id: "2",
-            start: new DayPilot.Date("2023-12-04T13:00:00"),
-            end: new DayPilot.Date("2023-12-04T14:00:00"),
-            text: "Event 1",
-          }
+    });
+
+    function createEvents() {
+        let days = [];
+        for (let i = 0; i < 7; ++i) {
+            let day = new Date();
+            let diff = i - day.getDay();
+            day.setDate(day.getDate() + diff);
+            days[i] = day.getFullYear() + " - " + _pad(day.getMonth()+1) + " - " + _pad(day.getDate());
+        }
+
+
+        return [
+            {id: 1,start: days[4] + " 08:30", end: days[4] + " 11:45", resourceID: 2, editable: false, title: {html: '<p>some HTML</p>'}, color: "#FE6B64" },
+            {id: 2,start: days[4] + " 08:00", end: days[4] + " 11:45", resourceID: 1,editable: false, title: {html: '<p>Nummer 2</p>'} , color: "#779ECB"},
+
         ];
-        dp.onBeforeEventRender = function(args) {
-            var start = new Date(args.data.start);
-            var end = new Date(args.data.end);
-
-
-// Format the date string in the user's local time
-var formattedDateStart = start.toLocaleString();
-var formattedDateEnd = end.toLocaleString();
-
-      };
-      dp.timeHeaderCellDuration = 40;
-        dp.useEventBoxes = "Always";
-        dp.init();
-        const app = {
-    init() {
-        this.addEventHandlers();
-       // this.loadEventData();
-    },
-    addEventHandlers() {
-        document.querySelector("#previous").addEventListener("click", (ev) => {
-            ev.preventDefault();
-            dp.startDate = dp.startDate.addDays(-7);
-            dp.update();
-        });
-        document.querySelector("#next").addEventListener("click", (ev) => {
-            ev.preventDefault();
-            dp.startDate = dp.startDate.addDays(7);
-            dp.update();
-        });
-    },
-    loadEventData() {
-        const events = [
-            {
-                start: DayPilot.Date.today().firstDayOfWeek().addDays(1).addHours(12),
-                end: DayPilot.Date.today().firstDayOfWeek().addDays(1).addHours(15),
-                id: DayPilot.guid(),
-                text: "Kig her i koden for at se hvad det er der sker! (" + start + "-" + this.end + ")"
-            }
-        ];
-        dp.update({events});
     }
-};
-var corner = document.querySelector(".calendar_default_corner");
-        corner.innerHTML ='<div class="calendar_default_corner_inner" unselectable="on"></div>';
-app.init();
+    function _pad(num) {
+        let norm = Math.floor(Math.abs(num));
+        return (norm < 10 ? '0' : '') + norm;
+    }
+
       </script>
 </body>
 </html>
