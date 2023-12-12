@@ -3,85 +3,301 @@
   <head id="head">
   </head>
 <body>
-<div id="menu"></div>
-    <div class="container">
+  <div class="container-fluid">
+    <div class="row">
+      <div id="menu" class="sidebar border border-right col-md-3 col-lg-2 p-2 bg-body-tertiary"></div>
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      
       <div id="ec"></div>
       <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="myModalLabel">Modal title</h1>
+              <h1 class="modal-title fs-5" id="myModalLabel">Tilføj begivenhed</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+              <label for="titel">Titel:</label>
+              <input type="text" id="titel" name="titel" ><br>
+              <label for="room">Vælg rum:</label>
+              <select id="room">
+              </select><br>
               <label for="start">Starttidspunkt:</label>
               <input type="datetime-local" id="start" name="start" ><br>
               <label for="end">Sluttidspunkt:</label>
               <input type="datetime-local" id="end" name="end"><br>
+              <label for="content">Beskrivelse:</label><br>
+              <textarea name="content" id="content" cols="50" rows="10"></textarea><br>
               <label for="type">Vælg type:</label>
               <select id="type">
                 <option value="1">Plan</option>
                 <option value="2">Opgave</option>
               </select><br>
-              <label for="content">Inhold:</label>
-              <input type="text" name="content" id="Content">
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
-              <button type="button" class="btn btn-primary" id="create">Opret</button>
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="create" onclick="createCalendarEvent()">Opret</button>
             </div>
           </div>
         </div>
       </div>
+      <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="eventModalLabel"></h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"  aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h6>Starttidspunkt</h6>
+              <p id="startTime"></p>
+              <h6>Sluttidspunkt</h6>
+              <p id="endTime"></p>
+              
+              <h6>Rum</h6>
+              <p id="eventRoom"></p>
+              <h6>Beskrivelse</h6>
+              <p id="eventContent"></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="deleteModalLabel">Slet begivenhed</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p id="eventDeletion">Er du sikker på at du vil slette <span id="eventResource"></span> <span id="eventToDelete"></span></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
+              <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="remove" onclick="removeCalendarEvent(eventToDelete)">Slet</button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      </main>
+      </div>
+      </div>
       </div>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@2.4.1/event-calendar.min.css">
       <script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@2.4.1/event-calendar.min.js"></script>
+    <script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+
     <script>
     
-      document.addEventListener("DOMContentLoaded", function()  {
+      document.addEventListener("DOMContentLoaded", async function()  {
         $(function() {
               $("#menu").load("http://localhost:5500/html/includes/menu.html");
            });
            $(function() {
               $("#head").load("http://localhost:5500/html/includes/head.html");
            });
-
-
+           var rooms = await getUserRooms(JSON.parse(localStorage.getItem("logged_in_user")).email);
+           console.log(rooms);
+           rooms.forEach(room => {
+            var option = document.createElement("option");
+            option.value = room.room_id;
+            option.innerHTML = room.room_name;
+            document.getElementById("room").appendChild(option);
+           });
 
       })
-      function createCalendarEvent() {
+      async function getUserRooms(user_email) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_users_rooms_by_email?user_email=" + user_email, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
+async function getSingleEvent(event_id) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_event_by_id?event_id=" + event_id, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      return result[0];
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
+function formatDateString(inputDateString) {
+  // Parse the input date string
+  const date = new Date(inputDateString);
+
+  // Get the components of the date
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const day = date.getDate();
+  const month = date.getMonth() + 1; // Months are zero-based
+  const year = date.getFullYear();
+
+  // Format the components into the desired string
+  const formattedString = `${_pad(hours)}:${_pad(minutes)} d. ${_pad(day)}/${_pad(month)}-${year}`;
+
+  return formattedString;
+}      
+function createCalendarEvent() {
     const startInput = document.getElementById('start');
     const endInput = document.getElementById('end');
     const typeSelect = document.getElementById('type');
-    const contentInput = document.getElementById('Content');
+    const roomSelect = document.getElementById('room');
 
+    const contentInput = document.getElementById('content');
+    const titleInput = document.getElementById('titel');
     // Get the selected type value
     const selectedType = typeSelect.options[typeSelect.selectedIndex].value;
+    const selectedRoom = roomSelect.options[roomSelect.selectedIndex].value;
 
     // Convert date inputs to the desired format
-    const startDateTime = new Date(startInput.value).toISOString();
-    const endDateTime = new Date(endInput.value).toISOString();
+    const startDateTime = new Date(startInput.value);
+    const endDateTime = new Date(endInput.value);
 
     // Create the calendar event object
     const calendarEvent = {
-      id: 1, // You can generate a unique ID based on your requirements
-      start: startDateTime,
-      end: endDateTime,
+      start: startDateTime.toISOString(),
+      end: endDateTime.toISOString(),
       resourceID: parseInt(selectedType),
       editable: false,
-      title: { html: `<p>${contentInput.value}</p>` },
-      color: "#FE6B64"
+      title: { html: `<p>${titleInput.value}<br>${roomSelect.options[roomSelect.selectedIndex].innerHTML}</p> ` },
+      extendedProps: {roomOID: parseInt(selectedRoom)},
+      color: null
     };
-
+    // Indhold til modal til udskrivning
+    // <h2>${titleInput.value}</h2><br><p>Rum: ${roomSelect.options[roomSelect.selectedIndex].innerHTML}</p><br><p>${contentInput.value}</p>
+    if (calendarEvent.resourceID == 1){
+      calendarEvent.color = "#779ECB"
+    }else if (calendarEvent.resourceID == 2){
+      calendarEvent.color = "#FE6B64"
+    }
     // Log the created calendar event object (you can send it to your calendar library)
     ec.addEvent(calendarEvent);
-  }
-  document.getElementById('create').addEventListener('click', createCalendarEvent);
 
+    startDateTime.setHours(startDateTime.getHours() + 1);
+    endDateTime.setHours(endDateTime.getHours() + 1);
+
+    const formData = {
+    start_time: startDateTime,
+    end_time: endDateTime,
+    rooms_oid: parseInt(selectedRoom),
+    event_text: contentInput.value,
+    event_title: titleInput.value,
+    event_resource_id: parseInt(selectedType)
+    // Add other form data as needed
+  };
+  const requestBody = {
+    event_info: formData,
+  };
+  var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg");
+  var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: JSON.stringify(requestBody),
+  redirect: 'follow'
+};
+
+fetch("http://49.13.148.231:3000/rpc/insert_into_events", requestOptions)
+  .then(response => response.text())
+  .then(result => console.log(result))
+  .catch(error => console.log('error', error));
+}
+
+  async function removeCalendarEvent(event_id) {
+    const formData = {
+    event_id: event_id,
     
-      const ec = new EventCalendar(document.getElementById('ec'), {
+    // Add other form data as needed
+  };
+  const requestBody = {
+    event_info: formData,
+  };
+  var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg");
+  var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: JSON.stringify(requestBody),
+  redirect: 'follow'
+};
+
+fetch("http://49.13.148.231:3000/rpc/delete_event_by_id", requestOptions)
+  .then(response => response.text())
+  .then(result => console.log(result))
+  .catch(error => console.log('error', error));
+  window.location.reload();
+}
+  var eventToDelete;
+  var deleteButton = document.createElement('button');
+    deleteButton.className = 'delete-button';
+    deleteButton.id = 'DeleteButton';
+    deleteButton.setAttribute('aria-label', 'Delete');
+    deleteButton.innerHTML = '<i class="bi bi-x"></i>';
+    deleteButton.addEventListener('click', async function () {
+      event.stopPropagation();
+    const eventModal = new bootstrap.Modal(document.getElementById('removeModal')); 
+           eventModal.show(); 
+           var selectedEvent = await getSingleEvent(eventToDelete);
+           if (selectedEvent.event_resource_id == 1){
+            document.getElementById("eventResource").innerHTML = "planen";
+
+            document.getElementById("eventToDelete").innerHTML = selectedEvent.event_title;
+           }else if (selectedEvent.event_resource_id == 2){
+            document.getElementById("eventResource").innerHTML = "opgaven";
+
+            document.getElementById("eventToDelete").innerHTML = selectedEvent.event_title;
+           }
+            
+
+  });
+    deleteButton.addEventListener('mouseenter', function () {
+      deleteButton.style.color = 'white';
+    });
+
+    deleteButton.addEventListener('mouseleave', function () {
+      deleteButton.style.color = '';
+    });    
+  const ec = new EventCalendar(document.getElementById('ec'), {
         
         view: 'timeGridWeek',
         headerToolbar: {
@@ -103,12 +319,77 @@
             {id: 1, title: 'Planer'},
             {id: 2, title: 'Opgaver'}
         ],
-        eventClick: function (info) {console.log(info);},
-        dateClick: function (info) {console.log(info); const myModal = new bootstrap.Modal(document.getElementById('myModal')); myModal.show(); document.getElementById("start").value = info.dateStr;  },
+        eventClick: async function (info) {var selectedEvent = await getSingleEvent(info.event.id);
+          const eventModal = new bootstrap.Modal(document.getElementById('eventModal')); 
+           eventModal.show(); 
+           document.getElementById("eventModalLabel").innerHTML = selectedEvent.event_title; 
+           document.getElementById("eventRoom").innerHTML = selectedEvent.rooms_name; 
+
+           document.getElementById("startTime").innerHTML = `${formatDateString(selectedEvent.start_time)}`;
+           document.getElementById("endTime").innerHTML = `${formatDateString(selectedEvent.end_time)}`;
+
+           document.getElementById("eventContent").innerHTML = selectedEvent.event_text; 
+
+        },
+        dateClick: function (info) {console.log(info);
+           const myModal = new bootstrap.Modal(document.getElementById('myModal')); 
+           myModal.show(); 
+           document.getElementById("start").value = info.dateStr; 
+
+// Convert ISO string to Date object
+const end = new Date(info.dateStr);
+end.setMinutes(end.getMinutes() + 255);
+
+
+// Add an hour to the date
+           document.getElementById("end").value = end.toISOString().slice(0, 16) },
         addEvent: function (event){console.log(event); },
+        eventMouseEnter: async function (info) {info.el.appendChild(deleteButton);
+           eventToDelete = info.event.id;
+
+          },
+        eventMouseLeave: function (info) { info.el.removeChild(deleteButton)},
         firstDay: 1,
         scrollTime: '09:00:00',
-        events: createEvents(),
+        
+        eventSources: [
+        {
+          events: async function(fetchInfo, successCallback, failureCallback) {
+            var events = [];
+        try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_all_users_events?user_name=" + JSON.parse(localStorage.getItem("logged_in_user")).email, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      result.forEach(element => {
+var start = new Date(element.start_time);
+var end = new Date(element.end_time);
+        var event = {id: element.events_id,start: start, end: end, resourceID: element.events_resource_id,editable: false, title: { html: `<p>${element.events_title}<br>${element.rooms_name}</p> ` },color: null};
+        if (event.resourceID == 1){
+      event.color = "#779ECB"
+    }else if (event.resourceID == 2){
+      event.color = "#FE6B64"
+    }
+        events.push(event);
+      });
+      return events;
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+        }
+          }
+      ],
         views: {
             timeGridWeek: {pointer: true},
         },
@@ -120,22 +401,6 @@
   
     });
 
-    function createEvents() {
-        let days = [];
-        for (let i = 0; i < 7; ++i) {
-            let day = new Date();
-            let diff = i - day.getDay();
-            day.setDate(day.getDate() + diff);
-            days[i] = day.getFullYear() + " - " + _pad(day.getMonth()+1) + " - " + _pad(day.getDate());
-        }
-
-
-        return [
-            {id: 1,start: days[4] + " 08:30", end: days[4] + " 11:45", resourceID: 2, editable: false, title: {html: '<p>some HTML</p>'}, color: "#FE6B64" },
-            {id: 2,start: days[4] + " 08:00", end: days[4] + " 11:45", resourceID: 1,editable: false, title: {html: '<p>Nummer 2</p>'} , color: "#779ECB"},
-
-        ];
-    }
     function _pad(num) {
         let norm = Math.floor(Math.abs(num));
         return (norm < 10 ? '0' : '') + norm;

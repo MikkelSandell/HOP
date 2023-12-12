@@ -1,74 +1,66 @@
-<nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-      <a class="navbar-brand" id="mainPageLink" href="../mainPage.html"><i class="bi bi-code-square"></i></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item dropdown">
-                <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Rum
-                </a>
-                <ul class="dropdown-menu" id="sortingDropdown">
-                    <div class="container">
-                        <div class="row">
-                            <form class="d-flex">
-                              <div class="border p-2">
-                                <input class="form-control me-2 border-0 sorting" type="search" placeholder="Find Rum" aria-label="Search" oninput="search(this.value)">
-                              </div>
-                              <div class="border p-2">
-                                <button class="btn btn-primary" id="sortingButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                  Sortér
-                                </button>
-                                <ul class="nested-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                  <li><a class="dropdown-item" href="#" onclick="updateSortOrder('asc', event)">Alfabetisk</a></li>
-                                  <li><a class="dropdown-item" href="#" onclick="updateSortOrder('desc', event)">Omvendt Alfabetisk</a></li>
-                                </ul>
-                              </div>
-                            </form>
-                            <li><hr class="dropdown-divider"></li>
-                        </div>
-                        <div class="row rooms" id="roomList">
-
-                            </div>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="allRooms.html">Vis alle rum</a></li>
-                    </div>
-                </ul>
-              </li>
+          <a href="#" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none" id="mainPageLink">
+            <span class="fs-4">System</span>
+          </a>
+          <hr>
+          <ul class="nav nav-pills flex-column mb-auto ">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+              <span>Rum</span>
+            </h6>
+            <li class="nav-item">
+            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+              <li><form class="d-flex">
+                <div class="p-2">
+                    <input class="form-control me-2 border-0 sorting" type="search" placeholder="Find Rum" aria-label="Search" oninput="search(this.value)">
+                </div>
+                <div class="dropup p-2">
+                    <button class="btn btn-primary" id="sortingButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Sortér
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <li class="dropdown-item" onclick="updateSortOrder('asc', event)"><p>Alfabetisk</p></li>
+                        <li class="dropdown-item" onclick="updateSortOrder('desc', event)"><p>Omvendt Alfabetisk</p></li>
+                    </ul>
+                </div>
+            </form></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><div class="row rooms" id="roomList"></div>
+              <li><a class="nav_link" href="allRooms.html">Vis alle rum</a></li>
+            </ul>
+          </li>
           <li class="nav-item">
             <a class="nav-link" href="Calendar.html">Kalender</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="https://mit.kea.dk" target="_blank">Mit.kea.dk</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="https://office.com" target="_blank">Office 365</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Book grupperum</a>
-            <!-- target="_blank" -->
-          </li>
-          
+        </li>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+            <span>Andre funktioner</span>
+          </h6>
+            <li class="nav-item">
+                <a class="nav-link" href="https://mit.kea.dk" target="_blank">Mit.kea.dk</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://office.com" target="_blank">Office 365</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Book grupperum</a>
+                <!-- target="_blank" -->
+            </li>
+            <!-- Insert the dropdown here -->
         </ul>
-        </div>
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link settings" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="../../images/blank-profile-picture-973460_640.png" id="profile_image"><span  class="p-2 user_name"></span>
-            </a>                  <div class="dropdown-menu dropdown-menu-end settings_content">
-              <p class="user_info"><span class="user_name"></span>, <span id="user_role"></span></p>
-              <div class="dropdown-divider"></div>
-
-                  <a href="http://localhost:5500/html/settings.html" class="dropdown-item">Dine Indstillinger</a>
-                  <div class="dropdown-divider"></div>
-                  <a href="http://localhost:5500/index.html" class="dropdown-item">Log ud</a>
-              </div>
-          </li>
-      </ul>
-        </div>
-        </nav>
+        
+          <hr>
+          <ul class="nav nav-pills flex-column mb-auto ">
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
+            <span>Logget ind som<br><div class="p-2"><img src="../../images/blank-profile-picture-973460_640.png" id="profile_image"><span  class="p-2 user_name"></span></div>
+          </span>
+          </h6>
+            <li class="nav-item">
+<a href="http://localhost:5500/html/settings.html" class="nav-link">Dine indstillinger</a>
+            </li>
+            <li class="nav-item">
+              <a href="http://localhost:5500/index.html" class="nav-link">Log ud</a>
+                <!-- target="_blank" -->
+            </li>
+            <!-- Insert the dropdown here -->
+        </ul>
         <script>
          const elements = [...document.getElementsByClassName("user_name")];
 
@@ -76,7 +68,7 @@
 elements.forEach(element => {
   element.innerHTML = JSON.parse(localStorage.getItem("logged_in_user")).users_name;
 });
-          document.getElementById("user_role").innerHTML = JSON.parse(localStorage.getItem("logged_in_user")).roles_name;
+          //document.getElementById("user_role").innerHTML = JSON.parse(localStorage.getItem("logged_in_user")).roles_name;
           if (JSON.parse(localStorage.getItem("logged_in_user")).users_image == null){
             document.getElementById("profile_image").setAttribute("src", "http://localhost:5500/images/blank-profile-picture-973460_640.png");
               }else {
@@ -86,9 +78,6 @@ elements.forEach(element => {
           document.getElementById("sortingButton").addEventListener("click", function(event){
     event.stopPropagation();
   });
-  document.getElementById('sortingDropdown').addEventListener('click', function (event) {
-        event.stopPropagation();
-      });
       if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Underviser"){
         document.getElementById("mainPageLink").href = "http://localhost:5500/html/teacher/mainPage.html";
       }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
@@ -253,5 +242,6 @@ async function saveRoomInfo(oid) {
       console.error('Error calling PostgREST function:', error.message);
     }
 }
-create_rooms_list();
+ create_rooms_list();
+
         </script>
