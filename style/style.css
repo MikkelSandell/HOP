@@ -11,12 +11,16 @@ body {
     color: white; /* Change this to your desired text color */
   }
 
+
   /* Change the text color of active navbar link */
   .navbar-nav .nav-link.active {
     color: white; /* Change this to your desired text color */
   }
   .form-control{
     width: 125px;
+  }
+.sidebar::-webkit-scrollbar {
+  display: none;
   }
   #roomTable tbody tr:hover{
     background-color: grey !important;
