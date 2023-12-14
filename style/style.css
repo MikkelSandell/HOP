@@ -134,3 +134,20 @@ body {
 .delete-button:hover {
   color: white;
 }
+.event{
+ height: 130px !important;
+ overflow: hidden;
+}
+.eventWithRoom{
+  height: 210px !important;
+  overflow: hidden;
+ }
+.addPost{
+  box-shadow: 0 2px  rgba(0,0,0,.09);
+}
+.post-form{
+  width: 100% !important;
+}
+.comment-form{
+  width: 100% !important;
+}

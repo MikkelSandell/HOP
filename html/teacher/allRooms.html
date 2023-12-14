@@ -65,7 +65,7 @@
         var tableDataName = document.createElement("td");
         var tableDataJoined = document.createElement("td");
         tableDataName.innerHTML = element.room_name;
-        tableDataJoined.innerHTML = "test";
+        tableDataJoined.innerHTML = element.add_date_and_year;
         tableRow.appendChild(tableDataName);
         tableRow.addEventListener("click", async function(e) {
           e.preventDefault();
