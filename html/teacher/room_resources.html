@@ -12,21 +12,16 @@
                     <div class="row p-2">
                 <div class="flex-shrink-0 p-3" style="width: 280px;">
                   <ul class="list-unstyled ps-0">
-                    <li class="mb-1">
-                      <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="true">
-                        <i class="bi bi-folder p-2"></i> Fag
-                      </button>
-                      <div class="collapse show" id="home-collapse" style="">
-                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                          <li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded"><i class="bi bi-folder"></i>Opgaver</a></li>
-                          <li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded"><i class="bi bi-folder"></i>Materialer</a></li>
-                        </ul>
-                      </div>
+                    <li class="mb-1" id="folders">
                     </li>
                   </ul>
                 </div>
               <div class="col-md-6">
                 <h3>Resourcer</h3>
+                <div id="resource">
+                  <p>Vælg et menupunkt her til højre</p>
+              
+                </div>
               </div>
             </div>
     </main>
@@ -38,7 +33,7 @@
 
 <script>
 
-  document.addEventListener("DOMContentLoaded", function()  {
+  document.addEventListener("DOMContentLoaded", async function()  {
     $(function() {
           $("#menu").load("http://localhost:5500/html/includes/menu.html");
        });
@@ -48,7 +43,163 @@
        $(function() {
           $("#roomMenu").load("http://localhost:5500/html/includes/roomMenu.html");
        });
+       var room_id = JSON.parse(localStorage.getItem("selected_room")).room_id;
+       const RoomFolders = await getRoomFolders(room_id);
+
+       RoomFolders.forEach(async (folder) => {
+        const folderButton = document.createElement('button');
+    folderButton.className = 'btn btn-toggle d-inline-flex align-items-center rounded border-0';
+    folderButton.setAttribute('data-bs-toggle', 'collapse');
+    folderButton.setAttribute('data-bs-target', '#'+ folder.folder_name);
+    folderButton.setAttribute('aria-expanded', true);
+    folderButton.innerHTML = `<i class="bi bi-folder p-2"></i> ${folder.folder_name}`;
+    const collapseElement = document.createElement('div');
+    collapseElement.setAttribute('id', folder.folder_name);
+
+
+
+  const underFolders = await getUnderFolders(folder.folder_id, room_id);
+
+  const subfolderLinksElement = document.createElement('ul');
+    subfolderLinksElement.className = 'btn-toggle-nav list-unstyled fw-normal pb-1 small';
+  if(underFolders.length > 0){
+    collapseElement.className = `collapse show`;
+
+    underFolders.forEach(underFolder => {
+      // Create the subfolder link
+      const subfolderLink = document.createElement('li');
+      if (underFolder.folder_name == "Opgaver"){
+        const subfolderLinkContent = document.createElement('a');
+        subfolderLinkContent.classList = "link-dark d-inline-flex text-decoration-none rounded";
+        subfolderLinkContent.href ="#";
+        subfolderLinkContent.innerHTML = `<i class="bi bi-folder p-2"></i> ${underFolder.folder_name}`;
+        subfolderLinkContent.addEventListener('click', (event) => {
+    if (event.type === 'click') {
+      updatePage();
+    }
+  });
+        subfolderLink.appendChild(subfolderLinkContent);
+
+subfolderLinksElement.appendChild(subfolderLink);
+
+      }else{
+        const subfolderLinkContentElement = document.createElement('ul');
+
+const subfolderLinkContentButton = document.createElement('button');
+subfolderLinkContentButton .className = 'btn-toggle d-inline-flex align-items-center rounded border-0';
+subfolderLinkContentButton .setAttribute('data-bs-toggle', 'collapse');
+subfolderLinkContentButton .setAttribute('data-bs-target', '#'+ underFolder.folder_name);
+subfolderLinkContentButton .setAttribute('aria-expanded', true);
+subfolderLinkContentButton .innerHTML = `<i class="bi bi-folder p-2"></i> ${underFolder.folder_name}`;
+
+subfolderLinkContentElement.appendChild(subfolderLinkContentButton);
+subfolderLink.appendChild(subfolderLinkContentElement);
+
+// Append the subfolder link to subfolder links ul
+
+const undercollapseElement = document.createElement('div');
+undercollapseElement.className = 'collapse show';
+undercollapseElement.setAttribute('id', underFolder.folder_name);
+undercollapseElement.innerHTML = `<ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small"><li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded">Slides</a>
+</li><li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded">Links</a>
+</li><li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded">Dokumenter</a>
+</li></ul></li>`;
+// Append subfolder link to subfolder links ul
+subfolderLinkContentElement.appendChild(undercollapseElement);
+subfolderLink.appendChild(subfolderLinkContentElement)
+subfolderLinksElement.appendChild(subfolderLink);
+
+      }
+    });
+    // Append subfolder links ul to the submenu collapse element
+    collapseElement.appendChild(subfolderLinksElement);
+    
+    };
+    document.getElementById("folders").appendChild(folderButton);
+    document.getElementById("folders").appendChild(collapseElement);
   })
+
+
+  });
+
+
+  async function getRoomFolders(room_id){
+    try {
+          const response = await fetch("http://49.13.148.231:3000/rpc/get_folder_by_room_oid?room_oid=" + room_id, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log(result);
+      return result;
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+  }
+  async function getUnderFolders(folder_id, room_id) {
+  const formData = {
+    over_folder_id: folder_id,
+    room_oid: room_id,
+    // Add other form data as needed
+  };
+  const requestBody = {
+    folder_info: formData,
+  };
+  var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg");
+  var requestOptions = {
+    method: 'POST',
+    headers: myHeaders,
+    body: JSON.stringify(requestBody),
+    redirect: 'follow'
+  };
+
+  return fetch("http://49.13.148.231:3000/rpc/get_folders_under_folder", requestOptions)
+    .then(response => response.json())
+    .then(result => result)
+    .catch(error => console.log('error', error));
+}
+async function updatePage() {
+  try {
+          const response = await fetch("http://49.13.148.231:3000/rpc/get_all_users_events?user_name=" + JSON.parse(localStorage.getItem("logged_in_user")).email, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      const element =document.getElementById("resource");
+          element.innerHTML = "";
+      result.forEach(event => {
+        if (event.events_resource_id == 2){
+
+          console.log(event);
+          element.innerHTML += `${event.events_title}<br>`;
+        }
+      });
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
             </script>
 </body>
 </html>

@@ -155,3 +155,9 @@ body {
 .comment-form{
   width: 100% !important;
 }
+.folder {
+  font-weight: 600;
+}
+.subFolder{
+  padding-inline-start: 20px !important;
+}
