@@ -201,7 +201,12 @@ optGroup.label = rootFolder.name +" - Undermapper";
       subfolderwithoutsubfoldera.innerHTML = `${subFolder.name}`
       subfolderwithoutsubfoldera.addEventListener('click', (event) => {
     if (event.type === 'click') {
+    if(subFolder.name == "Opgaver"){
+      updatePage(rootFolder.id, room_id);
+    }else{
       getResources(subFolder.id, room_id);
+
+    }
     }
   });
   
@@ -456,11 +461,11 @@ async function updatePage(folder_id, room_id) {
 
         var eventElement = `<h5>${assignmentTitle}</h5>${start_time} - ${end_time}<br><h6>Beskrivelse:</h6><p>${assignmentContent}</p><button class="btn btn-primary m-2" style="bottom: 0; right: 0; position: absolute;" onclick="seeSubmissions(${assignmentId})">Besvarelser</button>`;
         var divEl = document.createElement('div');
-        divEl.classList.add("border")
+        divEl.classList.add("border");
         divEl.classList.add("m-2");
         divEl.classList.add("p-2");
-       divEl.classList.add("eventWithRoom");
-       divEl.style = "position: absolute; width: 50% !important;";
+       //divEl.classList.add("eventWithRoom");
+       divEl.style = "position: relative; ";
 
 
 
