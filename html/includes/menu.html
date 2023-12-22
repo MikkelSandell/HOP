@@ -83,6 +83,8 @@ elements.forEach(element => {
         document.getElementById("mainPageLink").href = "http://localhost:5500/html/teacher/mainPage.html";
       }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
         document.getElementById("mainPageLink").href = "http://localhost:5500/html/student/mainPage.html";
+      }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Administrator"){
+        document.getElementById("mainPageLink").href = "http://localhost:5500/html/admin/mainPage.html";
       }  
       function search(val) {
         // Convert the search value to lowercase for case-insensitive matching
@@ -193,7 +195,13 @@ elements.forEach(element => {
   
       const result = await response.json();
       if (result.length == 0){
-        document.getElementById("roomList").innerHTML = "Ingen rum";
+        var li = document.createElement("li");
+        var link = document.createElement("p");
+        //link.href = "javascript:void(0);";
+        link.classList.add("room");
+        link.innerHTML = "Ingen rum";
+        li.appendChild(link);
+        document.getElementById("roomList").appendChild(li);
       }else{
       result.forEach(element => {
         var li = document.createElement("li");
@@ -209,6 +217,8 @@ elements.forEach(element => {
         window.location.href = "http://localhost:5500/html/teacher/selectedRoom.html";
       }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
         window.location.href = "http://localhost:5500/html/student/selectedRoom.html";
+      }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Administrator"){
+        window.location.href = "http://localhost:5500/html/admin/selectedRoom.html";
       }
         });
         li.appendChild(link);

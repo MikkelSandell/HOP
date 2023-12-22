@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head id="head">
+  </head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div id="menu" class="sidebar border border-right col-md-3 col-lg-2 p-2 bg-body-tertiary"></div>
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <table class="table" id="roomTable">
+        <thead>
+          <tr>
+            <th scope="col">Navn på rum</th>
+            <th scope="col">Medlem side</th>
+          </tr>
+        </thead>
+        <button class="float-end btn btn-primary btn-sm room_button" id="opret_room" >Opret rum</button>
+        <tbody>
+          <!-- Add more rows as needed -->
+        </tbody>
+      </table>
+      </div>
+      </div>
+
+
+
+      <div class="modal fade" id="roomModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5 mr-5" id="submissionModalLabel">Opret rum </h1>
+            </div>
+            <div class="modal-body">
+                <label for="room_name">Skriv rummets navn:</label>
+                <input type="text" name="room_name" class="form-control" id="room_name">
+</div>
+              
+            <div class="modal-footer">
+<button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="roomCreate">Opret</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      </body>
+      </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+    <script>
+    
+      document.addEventListener("DOMContentLoaded", async function()  {
+        $(function() {
+              $("#menu").load("http://localhost:5500/html/includes/menu.html");
+           });
+           $(function() {
+              $("#head").load("http://localhost:5500/html/includes/head.html");
+           });
+           await create_rooms_list();
+      });
+
+
+  // Click event
+
+  async function create_rooms_list() {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_users_rooms_by_email?user_email=" + JSON.parse(localStorage.getItem("logged_in_user")).email, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      if (result.length == 0){
+        //tableRow.innerHTML = "Ingen rum";
+      }else{
+      result.forEach(element => {
+        var tableRow = document.createElement("tr");
+        var tableDataName = document.createElement("td");
+        var tableDataJoined = document.createElement("td");
+        tableDataName.innerHTML = element.room_name;
+        tableDataJoined.innerHTML = element.add_date_and_year;
+        tableRow.appendChild(tableDataName);
+        tableRow.addEventListener("click", async function(e) {
+          e.preventDefault();
+          var roomInfo = await saveRoomInfo(element.room_id);
+          localStorage.setItem("selected_room", JSON.stringify(roomInfo));
+          if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Underviser"){
+        window.location.href = "http://localhost:5500/html/teacher/selectedRoom.html";
+      }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
+        window.location.href = "http://localhost:5500/html/student/selectedRoom.html";
+      }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Administrator"){
+        window.location.href = "http://localhost:5500/html/admin/selectedRoom.html";
+      }
+      
+        });
+        tableRow.addEventListener("mouseover", function() {
+    // Add your hover event logic here
+    this.style.backgroundColor = "#e0e0e0";
+  });
+
+  tableRow.addEventListener("mouseout", function() {
+    // Add your hover event logic here
+    this.style.backgroundColor = "";
+  });
+  tableRow.appendChild(tableDataJoined);
+      console.log(tableRow);
+      document.querySelector("#roomTable tbody").appendChild(tableRow);
+      });
+    }
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
+async function saveRoomInfo(oid) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_room_by_oid?room_oid=" + oid, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      return result[0];
+
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
+
+
+document.getElementById('opret_room').addEventListener('click', () =>{
+  const roomModal = new bootstrap.Modal(document.getElementById('roomModal')); 
+  roomModal.show();
+           
+           document.getElementById('roomCreate').addEventListener('click', async function () {
+            const room_name = document.getElementById('room_name').value;
+            createRoom(room_name)
+            //window.location.reload();
+  
+           });});
+
+
+           async function createRoom(room_name) {
+
+      const formData = {
+    room_name: room_name,
+  };
+  const requestBody = {
+    room_info: formData,
+  };
+  var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg");
+  var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: JSON.stringify(requestBody),
+  redirect: 'follow'
+};
+
+fetch("http://49.13.148.231:3000/rpc/create_room", requestOptions)
+  .then(response => response.text())
+  .then(result => console.log(result))
+  .then(result => {
+//window.location.reload();
+  });
+}
+
+
+</script>
+</body>
+</html>

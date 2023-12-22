@@ -84,6 +84,8 @@ async function authenticate(email, pass) {
         window.location.href = "html/teacher/mainPage.html";
       }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
         window.location.href = "html/student/mainPage.html";
+      }else if (JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Administrator"){
+        window.location.href = "html/admin/mainPage.html";
       }
 
       }else if (result == false){

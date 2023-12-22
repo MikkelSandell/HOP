@@ -88,6 +88,13 @@ body {
   margin-top: .125rem;
   margin-left: 1.25rem;
 }
+
+.btn-toggle-nav p {
+  padding: .1875rem .5rem;
+  margin-top: .125rem;
+  margin-left: 1.25rem;
+}
+
 .btn-toggle-nav a:hover,
 .btn-toggle-nav a:focus {
   background-color: var(--bs-tertiary-bg);
@@ -163,4 +170,10 @@ body {
 }
 .modal-body .form-control{
   width: inherit !important;
+}
+
+.room_button{
+  position: absolute;
+  right: 1.5rem;
+  top: 0.2rem;
 }
