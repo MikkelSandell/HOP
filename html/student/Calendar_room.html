@@ -3,42 +3,106 @@
   <head id="head">
   </head>
 <body>
-<div id="menu"></div>
-<div id="roomMenu"></div>
-
-    <div class="container">
-        <div class="space">
-            Uge:
-            <a href="javascript:dp.startDate = dp.startDate.addDays(-7); dp.update();" id="previous">Tidligere</a>
-            |
-            <a href="javascript:dp.startDate = dp.startDate.addDays(7); dp.update();" id="next">Næste</a>
-        </div>
-        <div id="dp"></div>
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  ...
-                </div>
-                <div class="modal-footer">
-                 
-                </div>
-              </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div id="menu" class="sidebar border border-right col-md-3 col-lg-2 p-2 bg-body-tertiary"></div>
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div id="roomMenu"></div>
+      <div id="ec" class="p-2"></div>
+      <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="myModalLabel">Tilføj begivenhed</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <label for="titel">Titel:</label>
+              <input type="text" id="titel" name="titel" ><br>
+              <label for="room">Vælg rum:</label>
+              <select id="room">
+              </select><br>
+              <label for="start">Starttidspunkt:</label>
+              <input type="datetime-local" id="start" name="start" ><br>
+              <label for="end">Sluttidspunkt:</label>
+              <input type="datetime-local" id="end" name="end"><br>
+              <label for="content">Beskrivelse:</label><br>
+              <textarea name="content" id="content" cols="50" rows="10"></textarea><br>
+              <label for="type">Vælg type:</label>
+              <select id="type" onchange="assignmentSelected(this)">
+                <option value="1">Plan</option>
+                <option value="2">Opgave</option>
+              </select><br>
+              <div id="assignment" style="display: none;">
+              <label for="folderForAssignment">Vælg fagmappe:</label>
+              <select name="folderForAssignment" id="folderForAssignment"></select>
+            </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="create" onclick="createCalendarEvent()">Opret</button>
             </div>
           </div>
-
+        </div>
       </div>
+      <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="eventModalLabel"></h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"  aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h6>Starttidspunkt</h6>
+              <p id="startTime"></p>
+              <h6>Sluttidspunkt</h6>
+              <p id="endTime"></p>
+              
+              <h6>Rum</h6>
+              <p id="eventRoom"></p>
+              <h6>Beskrivelse</h6>
+              <p id="eventContent"></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="deleteModalLabel">Slet begivenhed</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p id="eventDeletion">Er du sikker på at du vil slette <span id="eventResource"></span> <span id="eventToDelete"></span></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
+              <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="remove" onclick="removeCalendarEvent(eventToDelete)">Slet</button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      </main>
+      </div>
+      </div>
+      </div>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@2.4.1/event-calendar.min.css">
+      <script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@2.4.1/event-calendar.min.js"></script>
+    <script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-    <script src="http://localhost:5500/scripts/daypilot-all.min.js"></script>
+
 
     <script>
     
-      document.addEventListener("DOMContentLoaded", function()  {
+      document.addEventListener("DOMContentLoaded", async function()  {
         $(function() {
               $("#menu").load("http://localhost:5500/html/includes/menu.html");
            });
@@ -46,102 +110,155 @@
               $("#head").load("http://localhost:5500/html/includes/head.html");
            });
            $(function() {
-              $("#roomMenu").load("http://localhost:5500/html/includes/RoomMenu.html");
-           });
+          $("#roomMenu").load("http://localhost:5500/html/includes/roomMenu.html");
+       });
+
       })
-        const dp = new DayPilot.Calendar("dp", {
-  locale: "da-dk",
-  viewType: "Week",
-  headerDateFormat: "d MMMM yyyy",
-  cellHeight: 40,
-  crosshairType: "Disabled",
-  dayBeginsHour: 7,
-  dayEndsHour: 2,
-  businessBeginsHour: 7,
-  businessEndsHour: 2,
-  timeRangeSelectedHandling: "Disabled",
-  eventMoveHandling: "Disabled",
-  eventResizeHandling: "Disabled",
-  eventClickHandling: "Enabled",
-  durationBarVisible: "true",
-  onEventClicked: (args) => {
-    var modal = new bootstrap.Modal(document.getElementById("exampleModal"));
 
-  // Set the modal title
-  var modalTitle = document.querySelector("#exampleModalLabel");
-  modalTitle.textContent = "Detaljer";
-
-  // Set the modal body content (customize this based on your event data)
-  var modalBody = document.querySelector(".modal-body");
-  modalBody.textContent = args.e.text();
-
-  // Show the modal
-  modal.show();
-    console.log("Event clicked: " + args.e.text());
-  },
-  eventHoverHandling: "Bubble",
-  bubble: new DayPilot.Bubble({
-    onLoad: (args) => {
-      // if event object doesn't specify "bubbleHtml" property 
-      // this onLoad handler will be called to provide the bubble HTML
-      args.html = "Event details";
+async function getSingleEvent(event_id) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_event_by_id?event_id=" + event_id, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      return result[0];
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
     }
-  }),
-});
-        dp.events.list = [
-          {
-            id: "1",
-            start: new DayPilot.Date("2023-11-27T13:00:00"),
-            end: new DayPilot.Date("2023-11-27T14:00:00"),
-            text: "Event 1",
+}
+function formatDateString(inputDateString) {
+  // Parse the input date string
+  const date = new Date(inputDateString);
+
+  // Get the components of the date
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const day = date.getDate();
+  const month = date.getMonth() + 1; // Months are zero-based
+  const year = date.getFullYear();
+
+  // Format the components into the desired string
+  const formattedString = `${_pad(hours)}:${_pad(minutes)} d. ${_pad(day)}/${_pad(month)}-${year}`;
+
+  return formattedString;
+}          
+  const ec = new EventCalendar(document.getElementById('ec'), {
+        
+        view: 'timeGridWeek',
+        headerToolbar: {
+            start: 'prev,next today',
+            center: 'title',
+            end: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        buttonText: function (texts) {
+            texts.today = 'I dag';
+            texts.dayGridMonth = 'Måned';
+
+            texts.timeGridWeek = 'Uge';
+            texts.timeGridDay = 'Dag';
+            texts.listWeek = 'Liste';
+
+            return texts;
+        },
+        resources: [
+            {id: 1, title: 'Planer'},
+            {id: 2, title: 'Opgaver'}
+        ],
+        eventClick: async function (info) {var selectedEvent = await getSingleEvent(info.event.id);
+          const eventModal = new bootstrap.Modal(document.getElementById('eventModal')); 
+           eventModal.show(); 
+           document.getElementById("eventModalLabel").innerHTML = selectedEvent.event_title; 
+           document.getElementById("eventRoom").innerHTML = selectedEvent.rooms_name; 
+
+           document.getElementById("startTime").innerHTML = `${formatDateString(selectedEvent.start_time)}`;
+           document.getElementById("endTime").innerHTML = `${formatDateString(selectedEvent.end_time)}`;
+
+           document.getElementById("eventContent").innerHTML = selectedEvent.event_text; 
+
+        },
+        firstDay: 1,
+        scrollTime: '09:00:00',
+        
+        eventSources: [
+        {
+          events: async function(fetchInfo, successCallback, failureCallback) {
+            var events = [];
+        try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_all_users_events?user_name=" + JSON.parse(localStorage.getItem("logged_in_user")).email, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      result.forEach(element => {
+var start = new Date(element.start_time);
+var end = new Date(element.end_time);
+        var event = {id: element.events_id,start: start, end: end, resourceID: element.events_resource_id,editable: false, title: { html: `<p>${element.events_title}<br>${element.rooms_name}</p> ` },color: null};
+        if (event.resourceID == 1){
+      event.color = "#779ECB"
+    }else if (event.resourceID == 2){
+      event.color = "#FE6B64"
+    }
+        events.push(event);
+      });
+      return events;
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+        }
           }
-        ];
-        dp.onBeforeEventRender = function(args) {
-            var start = new Date(args.data.start);
-            var end = new Date(args.data.end);
+      ],
+        views: {
+            timeGridWeek: {pointer: true},
+        },
+        dayMaxEvents: false,
+        nowIndicator: true,
+        selectable: true,
+        allDaySlot: false,
+        locale: "da-dk",
+  
+    });
 
-
-// Format the date string in the user's local time
-var formattedDateStart = start.toLocaleString();
-var formattedDateEnd = end.toLocaleString();
-
-      args.data.text += ` (${formattedDateStart} - ${formattedDateEnd})`;
-      };
-      dp.timeHeaderCellDuration = 30;
-        dp.useEventBoxes = "Always";
-        dp.init();
-        const app = {
-    init() {
-        this.addEventHandlers();
-       // this.loadEventData();
-    },
-    addEventHandlers() {
-        document.querySelector("#previous").addEventListener("click", (ev) => {
-            ev.preventDefault();
-            dp.startDate = dp.startDate.addDays(-7);
-            dp.update();
-        });
-        document.querySelector("#next").addEventListener("click", (ev) => {
-            ev.preventDefault();
-            dp.startDate = dp.startDate.addDays(7);
-            dp.update();
-        });
-    },
-    loadEventData() {
-        const events = [
-            {
-                start: DayPilot.Date.today().firstDayOfWeek().addDays(1).addHours(12),
-                end: DayPilot.Date.today().firstDayOfWeek().addDays(1).addHours(15),
-                id: DayPilot.guid(),
-                text: "Kig her i koden for at se hvad det er der sker! (" + start + "-" + this.end + ")"
-            }
-        ];
-        dp.update({events});
+    function _pad(num) {
+        let norm = Math.floor(Math.abs(num));
+        return (norm < 10 ? '0' : '') + norm;
     }
-};
-var corner = document.querySelector(".calendar_default_corner");
-        corner.innerHTML ='<div class="calendar_default_corner_inner" unselectable="on"></div>';
-app.init();
+    async function assignmentSelected(formSelect){
+      if(formSelect.value == 2){
+        document.getElementById('assignment').style.display = "block";
+        const rootFolders = await getRootFolders(document.getElementById('room').value);
+        rootFolders.forEach(element => {
+          const folderOption = document.createElement('option');
+          folderOption.value = element.folder_id;
+          folderOption.innerHTML = element.folder_name;
+          document.getElementById('folderForAssignment').appendChild(folderOption);
+        });
+      }else{
+        document.getElementById('assignment').style.display = "none";
+
+      }
+    }
+
       </script>
 </body>
 </html>

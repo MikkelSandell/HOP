@@ -54,8 +54,8 @@
                     <h1 class="modal-title fs-5 mr-5" id="submissionModalLabel">Opret mappe </h1>
                   </div>
                   <div class="modal-body">
-                    <label for="folderSelect">Vælg en mulighed:</label>
-                    <select id="folderSelect" class="form-control" onchange="showNextElement(this)">
+                    <label for="folderOptionSelect">Vælg en mulighed:</label>
+                    <select id="folderOptionSelect" class="form-control" onchange="showNextElement(this)">
                       <option value="1">Opret ny fagmappe</option>
                       <option value="2">Opret ny undermappe</option>
                     </select>
@@ -294,8 +294,7 @@ addFolderButton.addEventListener('click', () =>{
   folderModal.show();
            
            document.getElementById('folderCreate').addEventListener('click', async function () {
-            const selectElement = document.getElementById('folderSelect');
-
+            const selectElement = document.getElementById('folderOptionSelect');
 
   if (selectElement.value === '1') {
     const rootFolderName = document.getElementById('rootfolder_name').value;
@@ -608,9 +607,9 @@ myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e
     redirect: 'follow'
   };
 
-  return fetch("http://49.13.148.231:3000/rpc/insert_into_folder", requestOptions)
-    .then(response => response.json())
-    .then(result => result)
+   fetch("http://49.13.148.231:3000/rpc/insert_into_folder", requestOptions)
+    .then(response => response.text())
+    .then(result => console.log(result))
     .catch(error => console.log('error', error));
     window.location.reload();
 }
