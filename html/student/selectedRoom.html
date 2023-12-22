@@ -81,6 +81,12 @@
            $(function() {
           $("#roomMenu").load("http://localhost:5500/html/includes/RoomMenu.html");
        });
+       const cookieValue = document.cookie.match(/JWTExpires=([^;]+)/i)[1];
+       const expires = new Date(cookieValue);
+       console.log(expires);
+       if(new Date().getTime() > expires){
+        window.location.href = "http://localhost:5500/index.html";
+       }
        var user = JSON.parse(localStorage.getItem("logged_in_user"));
        if (user.users_image == null){
                 document.querySelector("#profile_image").setAttribute("src", "http://localhost:5500/images/blank-profile-picture-973460_640.png");

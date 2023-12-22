@@ -19,7 +19,7 @@
               <div class="col-md-6">
                 <h3>Resourcer</h3>
                 <div id="resource">
-                  <p>Vælg et menupunkt her til højre</p>
+                  <p>Vælg et menupunkt her til venstre</p>
                 </div>
               </div>
             </div>
@@ -54,8 +54,8 @@
                     <h1 class="modal-title fs-5 mr-5" id="submissionModalLabel">Opret mappe </h1>
                   </div>
                   <div class="modal-body">
-                    <label for="folderSelect">Vælg en mulighed:</label>
-                    <select id="folderSelect" class="form-control" onchange="showNextElement(this)">
+                    <label for="folderOptionSelect">Vælg en mulighed:</label>
+                    <select id="folderOptionSelect" class="form-control" onchange="showNextElement(this)">
                       <option value="1">Opret ny fagmappe</option>
                       <option value="2">Opret ny undermappe</option>
                     </select>
@@ -97,6 +97,12 @@
        $(function() {
           $("#roomMenu").load("http://localhost:5500/html/includes/roomMenu.html");
        });
+       const cookieValue = document.cookie.match(/JWTExpires=([^;]+)/i)[1];
+       const expires = new Date(cookieValue);
+       console.log(expires);
+       if(new Date().getTime() > expires){
+        window.location.href = "http://localhost:5500/index.html";
+       }
        var room_id = JSON.parse(localStorage.getItem("selected_room")).room_id;
 
 const rootFolders = await getRoomFolders(room_id);
@@ -201,7 +207,12 @@ optGroup.label = rootFolder.name +" - Undermapper";
       subfolderwithoutsubfoldera.innerHTML = `${subFolder.name}`
       subfolderwithoutsubfoldera.addEventListener('click', (event) => {
     if (event.type === 'click') {
+    if(subFolder.name == "Opgaver"){
+      updatePage(rootFolder.id, room_id);
+    }else{
       getResources(subFolder.id, room_id);
+
+    }
     }
   });
   
@@ -289,8 +300,7 @@ addFolderButton.addEventListener('click', () =>{
   folderModal.show();
            
            document.getElementById('folderCreate').addEventListener('click', async function () {
-            const selectElement = document.getElementById('folderSelect');
-
+            const selectElement = document.getElementById('folderOptionSelect');
 
   if (selectElement.value === '1') {
     const rootFolderName = document.getElementById('rootfolder_name').value;
@@ -456,11 +466,11 @@ async function updatePage(folder_id, room_id) {
 
         var eventElement = `<h5>${assignmentTitle}</h5>${start_time} - ${end_time}<br><h6>Beskrivelse:</h6><p>${assignmentContent}</p><button class="btn btn-primary m-2" style="bottom: 0; right: 0; position: absolute;" onclick="seeSubmissions(${assignmentId})">Besvarelser</button>`;
         var divEl = document.createElement('div');
-        divEl.classList.add("border")
+        divEl.classList.add("border");
         divEl.classList.add("m-2");
         divEl.classList.add("p-2");
-       divEl.classList.add("eventWithRoom");
-       divEl.style = "position: absolute; width: 50% !important;";
+       //divEl.classList.add("eventWithRoom");
+       divEl.style = "position: relative; ";
 
 
 
@@ -603,9 +613,9 @@ myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e
     redirect: 'follow'
   };
 
-  return fetch("http://49.13.148.231:3000/rpc/insert_into_folder", requestOptions)
-    .then(response => response.json())
-    .then(result => result)
+   fetch("http://49.13.148.231:3000/rpc/insert_into_folder", requestOptions)
+    .then(response => response.text())
+    .then(result => console.log(result))
     .catch(error => console.log('error', error));
     window.location.reload();
 }

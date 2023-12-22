@@ -34,6 +34,12 @@
            $(function() {
               $("#head").load("http://localhost:5500/html/includes/head.html");
            });
+           const cookieValue = document.cookie.match(/JWTExpires=([^;]+)/i)[1];
+       const expires = new Date(cookieValue);
+       console.log(expires);
+       if(new Date().getTime() > expires){
+        window.location.href = "http://localhost:5500/index.html";
+       }
            await create_rooms_list();
       });
 
@@ -75,7 +81,10 @@
         window.location.href = "http://localhost:5500/html/teacher/selectedRoom.html";
       }else if(JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Studerende"){
         window.location.href = "http://localhost:5500/html/student/selectedRoom.html";
-      }
+      }else if (JSON.parse(localStorage.getItem("logged_in_user")).roles_name == "Administrator") {
+            window.location.href = "http://localhost:5500/html/admin/selectedRoom.html";
+
+        }
       
         });
         tableRow.addEventListener("mouseover", function() {

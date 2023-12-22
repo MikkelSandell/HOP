@@ -109,6 +109,12 @@
            $(function() {
               $("#head").load("http://localhost:5500/html/includes/head.html");
            });
+           const cookieValue = document.cookie.match(/JWTExpires=([^;]+)/i)[1];
+       const expires = new Date(cookieValue);
+       console.log(expires);
+       if(new Date().getTime() > expires){
+        window.location.href = "http://localhost:5500/index.html";
+       }
            var rooms = await getUserRooms(JSON.parse(localStorage.getItem("logged_in_user")).email);
            console.log(rooms);
            rooms.forEach(room => {

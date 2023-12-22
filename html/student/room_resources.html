@@ -19,7 +19,7 @@
               <div class="col-md-6">
                 <h3>Resourcer</h3>
                 <div id="resource">
-                  <p>Vælg et menupunkt her til højre</p>
+                  <p>Vælg et menupunkt her til venstre</p>
                 </div>
                 <div id="oldResources">
                 </div>
@@ -46,6 +46,26 @@
               </div>
             </div>
 
+            <div class="modal fade" id="seeSubmissionModal" tabindex="-1" aria-labelledby="seeSubmissionModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5 mr-5" id="seeSubmissionModalLabel">Se besvarelsen til opgaven </h1>
+                  </div>
+                  <div class="modal-body">
+                    <h4>Dit svar</h5>
+                   <p id="submissionContent"></p>
+                   <h4>Lærerens svar</h5>
+                   <p><h6>Kommentar: </h6> <span id="submission_teacher_comment"></span></p>
+                   <p><h6>Status: </h6> <span id="submission_approval"></span></p>
+                                    </div>
+                  <div class="modal-footer">
+<button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="submitAssignment">Aflevér</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
             <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 
@@ -60,7 +80,14 @@
        $(function() {
           $("#roomMenu").load("http://localhost:5500/html/includes/roomMenu.html");
        });
+       const cookieValue = document.cookie.match(/JWTExpires=([^;]+)/i)[1];
+       const expires = new Date(cookieValue);
+       if(new Date().getTime() > expires){
+        window.location.href = "http://localhost:5500/index.html";
+       }
        var room_id = JSON.parse(localStorage.getItem("selected_room")).room_id;
+       const user_id = JSON.parse(localStorage.getItem('logged_in_user')).users_id;
+
 
 const rootFolders = await getRoomFolders(room_id);
 const nestedFolders = [];
@@ -143,7 +170,7 @@ for (const rootFolder of nestedFolders){
       subfolderwithoutsubfoldera.addEventListener('click', (event) => {
     if (event.type === 'click') {
     if(subFolder.name == "Opgaver"){
-      updatePage(rootFolder.id, room_id);
+      updatePage(rootFolder.id, room_id, user_id);
     }else{
       getResources(subFolder.id, room_id);
 
@@ -265,9 +292,9 @@ myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e
     .then(result => result)
     .catch(error => console.log('error', error));
 }
-async function updatePage(folder_id, room_id) {
+async function updatePage(folder_id, room_id, user_id) {
   try {
-          const response = await fetch("http://49.13.148.231:3000/rpc/get_assaigment_by_folder_id_and_room_oid?target_folder_id=" + folder_id + "&target_room_oid=" + room_id, {
+          const response = await fetch("http://49.13.148.231:3000/rpc/get_all_user_assigments?target_folder_id=" + folder_id + "&target_room_oid=" + room_id + "&target_user_id=" + user_id, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -282,63 +309,21 @@ async function updatePage(folder_id, room_id) {
       }
   
       const result = await response.json();
+      console.log(result);
       const element =document.getElementById("resource");
       element.innerHTML ="";
+
+      var oldResourcesHeader = document.createElement("h5");
+        oldResourcesHeader.innerHTML = "Gamle opgaver";
+        document.getElementById("oldResources").appendChild(oldResourcesHeader);
+
       result.forEach(assignment => {
-        const allSubmissions = [];
-  getSubmissions(assignment.assignments_id).then(submissions => {
-    submissions.forEach(submission => {
-      allSubmissions.push(submission);
-    });
-  });
 
         const today = new Date();
+        const user_id = JSON.parse(localStorage.getItem('logged_in_user')).users_id;
 
-if (today <= new Date(assignment.end_time)) {
-          var divEl = document.createElement('div');
-        divEl.classList.add("border");
-        divEl.classList.add("p-2");
-          var start_time = formatDate(new Date(assignment.start_time));
-        var end_time = formatDate(new Date(assignment.end_time));
-        var assignmentContent = assignment.assignment_text;
-        var assignmentTitle = assignment.assignment_title;
-
-        var eventElement = `<h5>${assignmentTitle}</h5>${start_time} - ${end_time}<br><h6>Beskrivelse:</h6><p>${assignmentContent}</p>`;
-        var divEl = document.createElement('div');
-        divEl.classList.add("border");
-        divEl.classList.add("m-2");
-        divEl.classList.add("p-2");
-       //divEl.classList.add("eventWithRoom");
-       divEl.style = "position: relative; ";
-       var submissionButton = document.createElement('button');
-       submissionButton.classList = "btn btn-primary m-2";
-       submissionButton.style ="bottom: 0; right: 0; position: absolute;";
-       submissionButton.innerHTML ="Aflevér opgave";
-       submissionButton.addEventListener('click', () => {
-        console.log(assignment);
-        const submissionModal = new bootstrap.Modal(document.getElementById('submissionModal')); 
-        submissionModal.show();
-document.getElementById('submissionModalLabel').innerHTML += assignmentTitle;
-document.getElementById('submitAssignment').addEventListener('click', () => {
-  const submission_text = document.getElementById('submission_text').value;
-  const submission_assignment_id = assignmentId;
-  const user_id = JSON.parse(localStorage.getItem('logged_in_user')).users_id;
-  submitAssignment(submission_text, submission_assignment_id, user_id);
-});
-       })
-
-
-        divEl.insertAdjacentHTML('beforeend', eventElement);
-        divEl.appendChild(submissionButton);
-
-        element.appendChild(divEl);
-      }else if (today >= new Date(assignment.end_time)){
-        console.log(assignment);
-
-        console.log(allSubmissions);
-        var oldAssignmentsHeader = document.createElement('h5');
-        oldAssignmentsHeader.innerHTML = "Gamle opgaver";
-        oldResources.appendChild(oldAssignmentsHeader);
+      if (new Date(assignment.end_time) <= today){
+        
         var divEl = document.createElement('div');
         divEl.classList.add("border");
         divEl.classList.add("p-2");
@@ -346,32 +331,42 @@ document.getElementById('submitAssignment').addEventListener('click', () => {
         var end_time = formatDate(new Date(assignment.end_time));
         var assignmentContent = assignment.assignment_text;
         var assignmentTitle = assignment.assignment_title;
-        var assignmentId = assignment.assignments_id;
-
+        
         var eventElement = `<h5>${assignmentTitle}</h5>${start_time} - ${end_time}<br><h6>Beskrivelse:</h6><p>${assignmentContent}</p>`;
         var divEl = document.createElement('div');
         divEl.classList.add("border");
         divEl.classList.add("m-2");
         divEl.classList.add("p-2");
-       //divEl.classList.add("eventWithRoom");
        divEl.style = "position: relative; ";
        var submissionButton = document.createElement('button');
        submissionButton.classList = "btn btn-primary m-2";
        submissionButton.style ="bottom: 0; right: 0; position: absolute;";
-       submissionButton.innerHTML ="Aflevér opgave";
+       submissionButton.innerHTML ="Se besvarelse";
        submissionButton.addEventListener('click', () => {
         console.log(assignment);
-        const submissionModal = new bootstrap.Modal(document.getElementById('submissionModal')); 
+        const submissionModal = new bootstrap.Modal(document.getElementById('seeSubmissionModal')); 
         submissionModal.show();
-document.getElementById('submissionModalLabel').innerHTML += assignmentTitle;
-document.getElementById('submitAssignment').addEventListener('click', () => {
-  const submission_text = document.getElementById('submission_text').value;
-  const submission_assignment_id = assignmentId;
-  const user_id = JSON.parse(localStorage.getItem('logged_in_user')).users_id;
-  submitAssignment(submission_text, submission_assignment_id, user_id);
+document.getElementById('submissionContent').innerHTML = assignment.submission_text;
+document.getElementById('seeSubmissionModalLabel').innerHTML = "Se besvarelsen til opgaven " + assignmentTitle;
+if(assignment.submission_approval == null){
+  document.getElementById('submission_teacher_comment').innerHTML = "Ingen kommentar";
+  document.getElementById('submission_approval').innerHTML = "Ingen status";
 
-});
+}else if(assignment.submission_approval == true){
+  document.getElementById('submission_teacher_comment').innerHTML = assignment.submission_teacher_comment;
+  document.getElementById('submission_approval').innerHTML = "Godkendt";
+}
+else if(assignment.submission_approval == false){
+  document.getElementById('submission_teacher_comment').innerHTML = assignment.submission_teacher_comment;
+  document.getElementById('submission_approval').innerHTML = "Ikke godkendt";
+}
+if ( assignment.submission_text == null){
+  document.getElementById('submissionContent').innerHTML = "Ikke afleveret";
 
+}else if (assignment.submission_text != null){
+  document.getElementById('submissionContent').innerHTML = assignment.submission_text;
+
+}
        })
 
 
@@ -379,9 +374,104 @@ document.getElementById('submitAssignment').addEventListener('click', () => {
         divEl.appendChild(submissionButton);
 
         document.getElementById("oldResources").appendChild(divEl);
-      }
-      });
-    } catch (error) {
+  }else if (new Date(assignment.end_time) >= today){
+  if(assignment.submitted == true){
+    var divEl = document.createElement('div');
+        divEl.classList.add("border");
+        divEl.classList.add("p-2");
+          var start_time = formatDate(new Date(assignment.start_time));
+        var end_time = formatDate(new Date(assignment.end_time));
+        var assignmentContent = assignment.assignment_text;
+        var assignmentTitle = assignment.assignment_title;
+
+        var eventElement = `<h5>${assignmentTitle}</h5>${start_time} - ${end_time}<br><h6>Beskrivelse:</h6><p>${assignmentContent}</p>`;
+        var divEl = document.createElement('div');
+        divEl.classList.add("border");
+        divEl.classList.add("m-2");
+        divEl.classList.add("p-2");
+       //divEl.classList.add("eventWithRoom");
+       divEl.style = "position: relative; ";
+       var submissionButton = document.createElement('button');
+       submissionButton.classList = "btn btn-primary m-2";
+       submissionButton.style ="bottom: 0; right: 0; position: absolute;";
+       submissionButton.innerHTML ="Se besvarelse";
+       submissionButton.addEventListener('click', () => {
+        console.log(assignment);
+        const submissionModal = new bootstrap.Modal(document.getElementById('seeSubmissionModal')); 
+        submissionModal.show();
+document.getElementById('submissionContent').innerHTML = assignment.submission_text;
+document.getElementById('seeSubmissionModalLabel').innerHTML = "Se besvarelsen til opgaven " + assignmentTitle;
+if(assignment.submission_approval == null){
+  document.getElementById('submission_teacher_comment').innerHTML = "Ingen kommentar";
+  document.getElementById('submission_approval').innerHTML = "Ingen status";
+
+}else if(assignment.submission_approval == true){
+  document.getElementById('submission_teacher_comment').innerHTML = assignment.submission_teacher_comment;
+  document.getElementById('submission_approval').innerHTML = "Godkendt";
+}
+else if(assignment.submission_approval == false){
+  document.getElementById('submission_teacher_comment').innerHTML = assignment.submission_teacher_comment;
+  document.getElementById('submission_approval').innerHTML = "Ikke godkendt";
+}
+if ( assignment.submission_text == null){
+  document.getElementById('submissionContent').innerHTML = "Ikke afleveret";
+
+}else if (assignment.submission_text != null){
+  document.getElementById('submissionContent').innerHTML = assignment.submission_text;
+
+}
+       })
+
+
+        divEl.insertAdjacentHTML('beforeend', eventElement);
+        divEl.appendChild(submissionButton);
+
+        document.getElementById("oldResources").appendChild(divEl);
+  }else{
+    var divEl = document.createElement('div');
+        divEl.classList.add("border");
+        divEl.classList.add("p-2");
+          var start_time = formatDate(new Date(assignment.start_time));
+        var end_time = formatDate(new Date(assignment.end_time));
+        var assignmentContent = assignment.assignment_text;
+        var assignmentTitle = assignment.assignment_title;
+
+        var eventElement = `<h5>${assignmentTitle}</h5>${start_time} - ${end_time}<br><h6>Beskrivelse:</h6><p>${assignmentContent}</p>`;
+        var divEl = document.createElement('div');
+        divEl.classList.add("border");
+        divEl.classList.add("m-2");
+        divEl.classList.add("p-2");
+       //divEl.classList.add("eventWithRoom");
+       divEl.style = "position: relative; ";
+       var submissionButton = document.createElement('button');
+       submissionButton.classList = "btn btn-primary m-2";
+       submissionButton.style ="bottom: 0; right: 0; position: absolute;";
+       submissionButton.innerHTML ="Aflevér opgave";
+       submissionButton.addEventListener('click', () => {
+        console.log(assignment);
+        const submissionModal = new bootstrap.Modal(document.getElementById('submissionModal')); 
+        submissionModal.show();
+document.getElementById('submissionModalLabel').innerHTML += assignmentTitle;
+document.getElementById('submitAssignment').addEventListener('click', () => {
+  const submission_text = document.getElementById('submission_text').value;
+  const submission_assignment_id = assignment.assignments_id;
+  const user_id = JSON.parse(localStorage.getItem('logged_in_user')).users_id;
+  submitAssignment(submission_text, submission_assignment_id, user_id);
+ });
+       })
+
+
+        divEl.insertAdjacentHTML('beforeend', eventElement);
+        divEl.appendChild(submissionButton);
+
+        element.appendChild(divEl);
+  }
+}
+      })}
+
+
+
+    catch (error) {
       console.error('Error calling PostgREST function:', error.message);
     }
 }
@@ -491,9 +581,9 @@ downloadLink.addEventListener('click', () => {
       console.error('Error calling PostgREST function:', error.message);
     }
 }
-async function getSubmissions(assignment_id) {
+async function getSubmissions(assignment_id, user_id) {
   try {
-          const response = await fetch("http://49.13.148.231:3000/rpc/get_submissions_by_assignments_id?target_assignments_id=" + assignment_id, {
+          const response = await fetch("http://49.13.148.231:3000/rpc/get_users_submission_by_assignments_id_and_user_id?target_assignments_id=" + assignment_id + "&target_user_id=" + user_id, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -506,7 +596,6 @@ async function getSubmissions(assignment_id) {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
       const result = await response.json();
       return result;
     } catch (error) {

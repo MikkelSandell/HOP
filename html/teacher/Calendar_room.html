@@ -105,6 +105,12 @@
            $(function() {
           $("#roomMenu").load("http://localhost:5500/html/includes/roomMenu.html");
        });
+       const cookieValue = document.cookie.match(/JWTExpires=([^;]+)/i)[1];
+       const expires = new Date(cookieValue);
+       console.log(expires);
+       if(new Date().getTime() > expires){
+        window.location.href = "http://localhost:5500/index.html";
+       }
            
       })
       async function getUserRooms(user_email) {

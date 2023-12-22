@@ -119,7 +119,8 @@ var expirationDate = new Date();
 expirationDate.setTime(expirationDate.getTime() + 30 * 60 * 1000); // 30 minutes in milliseconds
 
 // Set the cookie with the calculated expiration time
-document.cookie = "JWT=" + result + "; expires=" + expirationDate.toUTCString() + "; path=/";
+document.cookie = "JWT=" + result + ";expires=" + expirationDate.toUTCString() + ";path=/";
+document.cookie = "JWTExpires=" + expirationDate.toUTCString();
     } catch (error) {
       console.error('Error calling PostgREST function:', error.message);
     }
