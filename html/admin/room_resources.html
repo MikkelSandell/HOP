@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head id="head">
+  </head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div id="menu" class="sidebar border border-right col-md-3 col-lg-2 p-2 bg-body-tertiary"></div>
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div id="roomMenu"></div>
+
+                    <div class="row p-2">
+                <div class="flex-shrink-0 p-3" style="width: 280px;">
+                  <ul class="list-unstyled ps-0">
+                    <li class="mb-1" id="folders">
+                    </li>
+                  </ul>
+                </div>
+              <div class="col-md-6">
+                <h3>Resourcer</h3>
+                <div id="resource">
+                  <p>Vælg et menupunkt her til højre</p>
+                </div>
+              </div>
+            </div>
+    </main>
+    </div>
+            </div>
+            <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5 mr-5" id="submissionModalLabel">Upload fil</h1>
+                  </div>
+                  <div class="modal-body">
+                    <label for="resourceFile"></label>
+                   <input type="file" name="resourceFile" id="resourceFile">
+                   <br>
+                   <label for="folderSelect">Vælg filstruktur:</label>
+                   <br>
+<select id="folderSelect" multiple>
+</select>
+                  </div>
+                  <div class="modal-footer">
+<button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="upload">Upload</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="folderModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5 mr-5" id="submissionModalLabel">Opret mappe </h1>
+                  </div>
+                  <div class="modal-body">
+                    <label for="folderSelect">Vælg en mulighed:</label>
+                    <select id="folderSelect" class="form-control" onchange="showNextElement(this)">
+                      <option value="1">Opret ny fagmappe</option>
+                      <option value="2">Opret ny undermappe</option>
+                    </select>
+                    <div id="newRootFolder">
+                      <br>
+                      <label for="rootFolder_name">Skriv mappens navn:</label>
+                      <input type="text" name="rootfolder_name" class="form-control" id="rootfolder_name">
+
+</div>
+  <div id="newSubFolder" style="display: none;">
+    <br>
+  <label for="subFolderSelect">Vælg fag</label>
+<select name="subFolderSelect" id="subFolderSelect" class="form-control">
+</select>
+<br>
+                      <label for="subFolder_name">Skriv mappens navn:</label>
+                      <input type="text" name="subfolder_name" class="form-control" id="subfolder_name">
+</div>
+</div>
+                    
+                  <div class="modal-footer">
+<button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="folderCreate">Opret</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+            <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async ()  => {
+    $(function() {
+          $("#menu").load("http://localhost:5500/html/includes/menu.html");
+       });
+       $(function() {
+          $("#head").load("http://localhost:5500/html/includes/head.html");
+       });
+       $(function() {
+          $("#roomMenu").load("http://localhost:5500/html/includes/roomMenu.html");
+       });
+       var room_id = JSON.parse(localStorage.getItem("selected_room")).room_id;
+
+const rootFolders = await getRoomFolders(room_id);
+const nestedFolders = [];
+
+for (const rootFolder of rootFolders) {
+const folderId = rootFolder.folder_id;
+const folderName = rootFolder.folder_name;
+
+const rootFolderWithSubfolders = {
+id: folderId,
+name: folderName,
+subfolders: [],
+};
+
+const subFolders = await getSubFolders(folderId, room_id);
+for (const subfolder of subFolders) {
+const subfolderId = subfolder.folder_id;
+const subfolderName = subfolder.folder_name;
+
+const subsubfolders = await getSubFolders(subfolderId, room_id);
+let subsubfolderId = '';
+let subsubfolderName = '';
+for (const subsubfolder of subsubfolders){
+  subsubfolderId = subsubfolder.folder_id;
+  subsubfolderName = subsubfolder.folder_name;
+}
+
+const subfoldersObject = {
+  id: subfolderId,
+  name: subfolderName,
+  subfolders: [],
+};
+
+if (subsubfolders) {
+  subfoldersObject.subfolders = subsubfolders;
+
+}
+
+rootFolderWithSubfolders.subfolders.push(subfoldersObject);
+}
+
+nestedFolders.push(rootFolderWithSubfolders);
+
+}
+
+const foldersElement = document.getElementById('folders');
+
+for (const rootFolder of nestedFolders){
+  
+const rootFolderOption = document.createElement('option');
+  rootFolderOption.value = rootFolder.id;
+  rootFolderOption.innerHTML = rootFolder.name;
+  document.getElementById("folderSelect").appendChild(rootFolderOption);
+const folderOption = document.createElement('option');
+  folderOption.value = rootFolder.id;
+  folderOption.innerHTML = rootFolder.name;
+
+const optGroup = document.createElement('optgroup');
+optGroup.label = rootFolder.name +" - Undermapper";
+  
+  const rootFolderButton = document.createElement("button");
+  rootFolderButton.classList = "btn btn-toggle d-inline-flex align-items-center rounded border-0";
+  rootFolderButton.setAttribute("data-bs-toggle", "collapse");
+  rootFolderButton.setAttribute("data-bs-target", "#" + rootFolder.name);
+  rootFolderButton.setAttribute("aria-expanded", false);
+  rootFolderButton.innerHTML = `<i class="bi bi-folder p-2"></i> ${rootFolder.name}`;
+  rootFolderButton.addEventListener('click', (event) => {
+    if (event.type === 'click') {
+      getResources(rootFolder.id, room_id);
+    }
+  });
+
+  const rootFolderDiv = document.createElement('div');
+  rootFolderDiv.setAttribute("id", rootFolder.name);
+  rootFolderDiv.classList.add('collapse');
+  
+  const rootFolderul = document.createElement('ul');
+  rootFolderul.classList = "btn-toggle-nav list-unstyled fw-normal pb-1 small";
+
+  const subfolderOption = document.createElement('option');
+  subfolderOption.value = rootFolder.id;
+  subfolderOption.innerHTML = rootFolder.name;
+  document.getElementById('subFolderSelect').appendChild(folderOption);
+
+
+  const subFolders = rootFolder.subfolders;
+  for (const subFolder of subFolders){
+    const subsubFolders = subFolder.subfolders;
+    if(subFolder.name != "Opgaver" && subFolders.length >1){
+      const subFolderOption = document.createElement('option');
+  subFolderOption.value = subFolder.id;
+  subFolderOption.innerHTML = `${subFolder.name}`;
+  optGroup.appendChild(subFolderOption);
+    }
+    if (subsubFolders.length == 0){
+      
+      const subfolderwithoutsubfolderli = document.createElement('li');
+      const subfolderwithoutsubfoldera = document.createElement('a');
+      subfolderwithoutsubfoldera.classList = "link-dark d-inline-flex text-decoration-none rounded align-items-center subFolder";
+      subfolderwithoutsubfoldera.href = "#";
+      subfolderwithoutsubfoldera.innerHTML = `${subFolder.name}`
+      subfolderwithoutsubfoldera.addEventListener('click', (event) => {
+    if (event.type === 'click') {
+      getResources(subFolder.id, room_id);
+    }
+  });
+  
+
+
+      subfolderwithoutsubfolderli.appendChild(subfolderwithoutsubfoldera);
+      rootFolderul.appendChild(subfolderwithoutsubfolderli);
+
+    }else{
+      const subsubfolderli = document.createElement('li');
+      const subsubfolderul = document.createElement('ul');
+      subsubfolderul.classList.add('subFolder');
+
+      const subsubButton = document.createElement("button");
+      subsubButton.classList = "btn-toggle d-inline-flex align-items-center rounded border-0";
+      subsubButton.setAttribute("data-bs-toggle", "collapse");
+      subsubButton.setAttribute("data-bs-target", "#" + subFolder.name+subFolder.id);
+      subsubButton.setAttribute("aria-expanded", false);
+      subsubButton.innerHTML = `<i class="bi bi-folder p-2"></i> ${subFolder.name}`;
+      subsubButton.addEventListener('click', (event) => {
+    if (event.type === 'click') {
+      getResources(subFolder.id, room_id);
+    }
+  });
+      subsubfolderul.appendChild(subsubButton);
+      subsubfolderli.appendChild(subsubfolderul);
+  const subsubDiv = document.createElement('div');
+  subsubDiv.setAttribute("id", subFolder.name+subFolder.id);
+  subsubDiv.classList.add('collapse');
+  
+  const subsubul = document.createElement('ul');
+  subsubul.classList = "btn-toggle-nav list-unstyled fw-normal pb-1 small";
+
+subsubFolders.forEach(element => {
+  const subsubli = document.createElement('li');
+  const subsuba = document.createElement('a');
+      subsuba.classList = "link-dark d-inline-flex text-decoration-none rounded align-items-center";
+      subsuba.href = "#";
+      subsuba.innerHTML = `${element.folder_name}`
+      subsuba.addEventListener('click', (event) => {
+    if (event.type === 'click') {
+      getResources(element.folder_id, room_id);
+    }
+  });
+
+  const subsubFolderOption = document.createElement('option');
+
+subsubFolderOption.value = element.folder_id;
+subsubFolderOption.innerHTML = `${element.folder_name}`;
+optGroup.appendChild(subsubFolderOption);
+
+      subsubli.appendChild(subsuba);
+      subsubul.appendChild(subsubli);
+      subsubDiv.appendChild(subsubul);
+});
+
+
+  subsubfolderul.appendChild(subsubDiv);
+  rootFolderDiv.appendChild(subsubfolderul);
+    }
+  }
+
+  rootFolderDiv.appendChild(rootFolderul);
+
+
+foldersElement.appendChild(rootFolderButton);
+foldersElement.appendChild(rootFolderDiv);
+
+
+
+
+document.getElementById("folderSelect").appendChild(optGroup);
+
+
+}
+const addul = document.createElement('ul');
+  addul.classList = "btn-toggle-nav list-unstyled fw-normal pb-1 small";
+const addli = document.createElement('li');
+const addFolderButton = document.createElement('a');
+addFolderButton.classList = "link-dark d-inline-flex text-decoration-none rounded align-items-center";
+addFolderButton.href = "#"
+addFolderButton.innerHTML = `<br><i class="bi bi-folder p-2"></i> Tilføj Mappe`;
+addFolderButton.addEventListener('click', () =>{
+  const folderModal = new bootstrap.Modal(document.getElementById('folderModal')); 
+  folderModal.show();
+           
+           document.getElementById('folderCreate').addEventListener('click', async function () {
+            const selectElement = document.getElementById('folderSelect');
+
+
+  if (selectElement.value === '1') {
+    const rootFolderName = document.getElementById('rootfolder_name').value;
+    createRootFolder(rootFolderName, room_id);
+
+  } else if (selectElement.value === '2') {
+    const subFolderSelect = document.getElementById('subFolderSelect').value;
+    const subFolderName = document.getElementById('subfolder_name').value;
+    createSubFolder(subFolderSelect,subFolderName, room_id)
+
+  }
+           });});
+addli.appendChild(addFolderButton);
+ addul.appendChild(addli);
+  addul.classList = "btn-toggle-nav list-unstyled fw-normal pb-1 small";
+const addButton = document.createElement('a');
+addButton.classList = "link-dark d-inline-flex text-decoration-none rounded align-items-center";
+addButton.href = "#"
+addButton.innerHTML = `<br><i class="bi bi-file-arrow-up p-2"></i>
+ Tilføj fil`;
+ addButton.addEventListener('click', async () =>{
+  const fileModal = new bootstrap.Modal(document.getElementById('fileModal')); 
+          fileModal.show();
+          const resourceFileInput = document.getElementById('resourceFile');
+          const uploadButton = document.getElementById('upload');
+          let fileName = '';
+    let fileExtension = '';
+    let fileBase64String = '';
+resourceFileInput.addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+
+  if (file) {
+    // Get the file information
+    fileName = file.name;
+    fileExtension = file.type;
+    // Create a base64 string from the file
+    const fileReader = new FileReader();
+
+    fileReader.onload = function(event) {
+      fileBase64String = event.target.result;
+
+      console.log(`File name: ${fileName}`);
+      console.log(`File extension: ${fileExtension}`);
+      console.log(`Base64 string: ${fileBase64String.substring(fileBase64String.indexOf(',') +1)}`);
+    };
+
+    fileReader.readAsDataURL(file);
+  }
+});
+uploadButton.addEventListener('click', () =>{
+  const formData = {
+    new_resource_file: fileBase64String,
+    target_folder_id: document.getElementById('folderSelect').value,
+    target_room_oid: room_id,
+    new_resource_title: fileName,
+    new_resource_file_type: fileExtension
+    // Add other form data as needed
+  };
+  const requestBody = {
+    resource_info: formData,
+  };
+  var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg");
+  var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: JSON.stringify(requestBody),
+  redirect: 'follow'
+};
+
+fetch("http://49.13.148.231:3000/rpc/insert_into_resources", requestOptions)
+  .then(response => response.text())
+  .then(result => console.log(result))
+  .then(result => {
+window.location.reload();
+  });
+})
+});
+ addli.appendChild(addButton);
+ addul.appendChild(addli);
+
+foldersElement.appendChild(addul);
+
+
+});
+  async function getRoomFolders(room_id){
+    try {
+          const response = await fetch("http://49.13.148.231:3000/rpc/get_folder_by_room_oid?room_oid=" + room_id, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+  }
+  async function getSubFolders(folder_id, room_id) {
+  const formData = {
+    over_folder_id: folder_id,
+    room_oid: room_id,
+    // Add other form data as needed
+  };
+  const requestBody = {
+    folder_info: formData,
+  };
+  var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg");
+  var requestOptions = {
+    method: 'POST',
+    headers: myHeaders,
+    body: JSON.stringify(requestBody),
+    redirect: 'follow'
+  };
+
+  return fetch("http://49.13.148.231:3000/rpc/get_folders_under_folder", requestOptions)
+    .then(response => response.json())
+    .then(result => result)
+    .catch(error => console.log('error', error));
+}
+async function updatePage(folder_id, room_id) {
+  try {
+          const response = await fetch("http://49.13.148.231:3000/rpc/get_assaigment_by_folder_id_and_room_oid?target_folder_id=" + folder_id + "&target_room_oid=" + room_id, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      const element =document.getElementById("resource");
+      element.innerHTML ="";
+      result.forEach(assignment => {
+
+          console.log(assignment);
+          var divEl = document.createElement('div');
+        divEl.classList.add("border");
+        divEl.classList.add("p-2");
+          var start_time = formatDate(new Date(assignment.start_time));
+        var end_time = formatDate(new Date(assignment.end_time));
+        var assignmentContent = assignment.assignment_text;
+        var assignmentTitle = assignment.assignment_title;
+        var assignmentId = assignment.assignments_id;
+
+        var eventElement = `<h5>${assignmentTitle}</h5>${start_time} - ${end_time}<br><h6>Beskrivelse:</h6><p>${assignmentContent}</p><button class="btn btn-primary m-2" style="bottom: 0; right: 0; position: absolute;" onclick="seeSubmissions(${assignmentId})">Besvarelser</button>`;
+        var divEl = document.createElement('div');
+        divEl.classList.add("border")
+        divEl.classList.add("m-2");
+        divEl.classList.add("p-2");
+       divEl.classList.add("eventWithRoom");
+       divEl.style = "position: absolute; width: 50% !important;";
+
+
+
+        divEl.insertAdjacentHTML('beforeend', eventElement);
+
+        element.appendChild(divEl);
+          //element.innerHTML += `${event.events_title}<br>`;
+      });
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
+async function getResources(folder_id, room_id) {
+  try {
+          const response = await fetch("http://49.13.148.231:3000/rpc/get_resources_by_folder_id_and_room_oid?target_folder_id=" + folder_id + "&target_room_oid=" + room_id, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log(result);
+      const element =document.getElementById("resource");
+          element.innerHTML = "";
+
+          var table = document.createElement("table");
+          table.classList.add('table');
+          var tablerowHeader = document.createElement("thead");
+          var tableRowForTitles = document.createElement("tr");
+        var resourceNameTitle = document.createElement("th");
+        var resourceUploadTimeTitle = document.createElement("th");
+
+        resourceNameTitle.innerHTML = "Resourcens navn";
+        resourceUploadTimeTitle.innerHTML = "Uploadet";
+
+
+        
+        tableRowForTitles.appendChild(resourceNameTitle);
+        tableRowForTitles.appendChild(resourceUploadTimeTitle);
+        tablerowHeader.appendChild(tableRowForTitles);
+
+        table.appendChild(tablerowHeader);
+
+        var tablerowBody = document.createElement("tbody");
+
+      result.forEach(resource => {
+
+        var tableRow = document.createElement("tr");
+        var resourceName = document.createElement("td");
+        var resourceUploadTimeName = document.createElement("td");
+
+        const base64String = resource.resources_file;
+        const fileType = resource.resources_title_type;
+        const fileName= resource.resources_title;
+
+
+// Create the download link using the Blob object and the filename
+const downloadLink = document.createElement('a');
+downloadLink.href = base64String;
+downloadLink.download = fileName;
+downloadLink.innerHTML = fileName;
+
+
+// Add the download link to the resourceName element
+resourceName.innerHTML += downloadLink.outerHTML
+
+
+downloadLink.addEventListener('click', () => {
+  downloadLink.click();
+});
+
+        //resourceName.innerHTML = `<a href resource.resources_title`;
+        resourceUploadTimeName.innerHTML = resource.resource_uploaded_at;
+
+        tableRow.appendChild(resourceName);
+        tableRow.appendChild(resourceUploadTimeName);
+        tablerowBody.appendChild(tableRow);
+
+        table.appendChild(tablerowBody);
+          console.log(resource);
+      });
+      element.appendChild(table);
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
+function formatDate(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  const formattedDateString = `${day}/${month}-${year} ${hours}:${minutes}`;
+  return formattedDateString;
+}
+async function seeSubmissions(assigment_id){
+  window.location.href = "Submissions.html?assignment_id=" + assigment_id;
+
+  }    
+  function showNextElement(element) {
+  const selectElement = document.getElementById('folderSelect');
+  const newRootFolderElement = document.getElementById('newRootFolder');
+  const newSubFolderElement = document.getElementById('newSubFolder');
+
+
+  if (selectElement.value === '1') {
+    newRootFolderElement.style.display = 'block';
+    newSubFolderElement.style.display = 'none';
+
+  } else if (selectElement.value === '2') {
+    newSubFolderElement.style.display = 'block';
+    newRootFolderElement.style.display = 'none';
+  }
+}
+async function createRootFolder(rootFolderName, room_id) {
+  const formData = {
+    folder_name: rootFolderName,
+    room_oid: room_id,
+    // Add other form data as needed
+  };
+  const requestBody = {
+    folder_info: formData,
+  };
+  var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg");
+  var requestOptions = {
+    method: 'POST',
+    headers: myHeaders,
+    body: JSON.stringify(requestBody),
+    redirect: 'follow'
+  };
+
+  return fetch("http://49.13.148.231:3000/rpc/insert_into_folder", requestOptions)
+    .then(response => response.json())
+    .then(result => result)
+    .catch(error => console.log('error', error));
+    window.location.reload();
+}
+async function createSubFolder(rootFolderID,subFolderName, room_id) {
+  const formData = {
+    folder_name: subFolderName,
+    room_oid: room_id,
+    over_folder_id: rootFolderID
+    // Add other form data as needed
+  };
+  const requestBody = {
+    folder_info: formData,
+  };
+  var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg");
+  var requestOptions = {
+    method: 'POST',
+    headers: myHeaders,
+    body: JSON.stringify(requestBody),
+    redirect: 'follow'
+  };
+
+  return fetch("http://49.13.148.231:3000/rpc/insert_into_folder_as_under_folder", requestOptions)
+    .then(response => response.json())
+    .then(result => result)
+    .catch(error => console.log('error', error));
+    window.location.reload();
+}   
+            </script>
+</body>
+</html>
