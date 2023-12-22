@@ -161,3 +161,6 @@ body {
 .subFolder{
   padding-inline-start: 20px !important;
 }
+.modal-body .form-control{
+  width: inherit !important;
+}
