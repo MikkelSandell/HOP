@@ -198,8 +198,11 @@ function createCalendarEvent() {
     // Get the selected type value
     const selectedType = typeSelect.options[typeSelect.selectedIndex].value;
     const selectedRoom = roomSelect.options[roomSelect.selectedIndex].value;
-    const selectedFolder = folderSelect.options[folderSelect.selectedIndex].value;
+    if (document.getElementById('assignment').style.display == "block"){
+      const selectedFolder = folderSelect.options[folderSelect.selectedIndex].value;
 
+    }
+    
     // Convert date inputs to the desired format
     const startDateTime = new Date(startInput.value);
     const endDateTime = new Date(endInput.value);
