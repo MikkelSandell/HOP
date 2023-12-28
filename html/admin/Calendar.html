@@ -29,10 +29,14 @@
               <label for="content">Beskrivelse:</label><br>
               <textarea name="content" id="content" cols="50" rows="10"></textarea><br>
               <label for="type">Vælg type:</label>
-              <select id="type">
+              <select id="type" onchange="assignmentSelected(this)">
                 <option value="1">Plan</option>
                 <option value="2">Opgave</option>
               </select><br>
+              <div id="assignment" style="display: none;">
+              <label for="folderForAssignment">Vælg fagmappe:</label>
+              <select name="folderForAssignment" id="folderForAssignment"></select>
+            </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Luk</button>
@@ -186,13 +190,19 @@ function createCalendarEvent() {
     const endInput = document.getElementById('end');
     const typeSelect = document.getElementById('type');
     const roomSelect = document.getElementById('room');
+    const folderSelect = document.getElementById('folderForAssignment');
+
 
     const contentInput = document.getElementById('content');
     const titleInput = document.getElementById('titel');
     // Get the selected type value
     const selectedType = typeSelect.options[typeSelect.selectedIndex].value;
     const selectedRoom = roomSelect.options[roomSelect.selectedIndex].value;
+    if (document.getElementById('assignment').style.display == "block"){
+      const selectedFolder = folderSelect.options[folderSelect.selectedIndex].value;
 
+    }
+    
     // Convert date inputs to the desired format
     const startDateTime = new Date(startInput.value);
     const endDateTime = new Date(endInput.value);
@@ -220,15 +230,27 @@ function createCalendarEvent() {
     startDateTime.setHours(startDateTime.getHours() + 1);
     endDateTime.setHours(endDateTime.getHours() + 1);
 
-    const formData = {
+    let formData = '';
+    if (selectedType == 2){
+      formData = {
     start_time: startDateTime,
     end_time: endDateTime,
     rooms_oid: parseInt(selectedRoom),
     event_text: contentInput.value,
     event_title: titleInput.value,
-    event_resource_id: parseInt(selectedType)
-    // Add other form data as needed
+    event_resource_id: parseInt(selectedType),
+    folder_id: parseInt(selectedFolder)
   };
+    }else{
+      formData = {
+    start_time: startDateTime,
+    end_time: endDateTime,
+    rooms_oid: parseInt(selectedRoom),
+    event_text: contentInput.value,
+    event_title: titleInput.value,
+    event_resource_id: parseInt(selectedType),
+  };
+    }
   const requestBody = {
     event_info: formData,
   };
@@ -413,6 +435,44 @@ var end = new Date(element.end_time);
         let norm = Math.floor(Math.abs(num));
         return (norm < 10 ? '0' : '') + norm;
     }
+    async function assignmentSelected(formSelect){
+      if(formSelect.value == 2){
+        document.getElementById('assignment').style.display = "block";
+        const rootFolders = await getRootFolders(document.getElementById('room').value);
+        rootFolders.forEach(element => {
+          const folderOption = document.createElement('option');
+          folderOption.value = element.folder_id;
+          folderOption.innerHTML = element.folder_name;
+          document.getElementById('folderForAssignment').appendChild(folderOption);
+        });
+      }else{
+        document.getElementById('assignment').style.display = "none";
+
+      }
+    }
+    async function getRootFolders(room_id) {
+    try {
+      const response = await fetch("http://49.13.148.231:3000/rpc/get_folder_by_room_oid?room_oid=" + room_id, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoicG9zdGdyZXMifQ.thixYwIHRZruXR7QWz6suUrzy81LsXdQsms3BU6cdFg'
+          // Add any additional headers if needed
+        },
+        // Add any function parameters as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log(result);
+      return result;
+    } catch (error) {
+      console.error('Error calling PostgREST function:', error.message);
+    }
+}
 
       </script>
 </body>
