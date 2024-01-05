@@ -552,7 +552,7 @@ downloadLink.addEventListener('click', () => {
 
         const upload_time = new Date(resource.resource_uploaded_at);
         upload_time.setHours(upload_time.getHours() +1);
-        resourceUploadTimeName.innerHTML = upload_time.toLocaleString();
+        resourceUploadTimeName.innerHTML = formatDate(upload_time);
 
         tableRow.appendChild(resourceName);
         tableRow.appendChild(resourceUploadTimeName);
