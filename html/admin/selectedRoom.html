@@ -81,7 +81,7 @@
            $(function() {
           $("#roomMenu").load("http://localhost:5500/html/includes/RoomMenu.html");
        });
-       const cookieValue = document.cookie.match(/JWTExpires=([^;]+)/i)[1];
+       const cookieValue = document.cookie.match(/JWTExpires=([^;]+)/i)[0];
        const expires = new Date(cookieValue);
        console.log(expires);
        if(new Date().getTime() > expires){
