@@ -315,6 +315,7 @@ async function updatePage(folder_id, room_id, user_id) {
 
       var oldResourcesHeader = document.createElement("h5");
         oldResourcesHeader.innerHTML = "Gamle opgaver";
+        document.getElementById("oldResources").innerHTML = "";
         document.getElementById("oldResources").appendChild(oldResourcesHeader);
 
       result.forEach(assignment => {
@@ -428,6 +429,7 @@ if ( assignment.submission_text == null){
 
         document.getElementById("oldResources").appendChild(divEl);
   }else{
+    
     var divEl = document.createElement('div');
         divEl.classList.add("border");
         divEl.classList.add("p-2");
@@ -451,7 +453,7 @@ if ( assignment.submission_text == null){
         console.log(assignment);
         const submissionModal = new bootstrap.Modal(document.getElementById('submissionModal')); 
         submissionModal.show();
-document.getElementById('submissionModalLabel').innerHTML += assignmentTitle;
+document.getElementById('submissionModalLabel').innerHTML = assignmentTitle;
 document.getElementById('submitAssignment').addEventListener('click', () => {
   const submission_text = document.getElementById('submission_text').value;
   const submission_assignment_id = assignment.assignments_id;
@@ -459,7 +461,6 @@ document.getElementById('submitAssignment').addEventListener('click', () => {
   submitAssignment(submission_text, submission_assignment_id, user_id);
  });
        })
-
 
         divEl.insertAdjacentHTML('beforeend', eventElement);
         divEl.appendChild(submissionButton);
@@ -561,7 +562,7 @@ downloadLink.innerHTML = fileName;
 
 
 // Add the download link to the resourceName element
-resourceName.innerHTML += downloadLink.outerHTML
+resourceName.innerHTML = downloadLink.outerHTML
 
 
 downloadLink.addEventListener('click', () => {

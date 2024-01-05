@@ -477,7 +477,6 @@ async function updatePage(folder_id, room_id) {
         divEl.insertAdjacentHTML('beforeend', eventElement);
 
         element.appendChild(divEl);
-          //element.innerHTML += `${event.events_title}<br>`;
       });
     } catch (error) {
       console.error('Error calling PostgREST function:', error.message);
